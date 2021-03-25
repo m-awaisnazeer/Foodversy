@@ -10,15 +10,16 @@ import com.communisolve.foodversy.EventBus.CategoryClick
 import com.communisolve.foodversy.callbacks.IRecyclerItemClickLitner
 import com.communisolve.foodversy.common.Common
 import com.communisolve.foodversy.databinding.LayoutCategoryItemBinding
-import com.communisolve.foodversy.model.CategoryModel
+import com.communisolve.foodversy.databinding.LayoutFoodItemBinding
+import com.communisolve.foodversy.model.FoodModel
 import org.greenrobot.eventbus.EventBus
 
-class MyCategoriesAdapter(
+class MyFoodListAdapter(
     internal var context: Context,
-    internal var CategoriesList: List<CategoryModel>
+    internal var foodsList: List<FoodModel>
 
-) : RecyclerView.Adapter<MyCategoriesAdapter.ViewHolder>() {
-    var binding: LayoutCategoryItemBinding? = null
+) : RecyclerView.Adapter<MyFoodListAdapter.ViewHolder>() {
+    var binding: LayoutFoodItemBinding? = null
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
         private var listner: IRecyclerItemClickLitner? = null
@@ -38,38 +39,26 @@ class MyCategoriesAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         binding =
-            LayoutCategoryItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            LayoutFoodItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding!!.root)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        Glide.with(context).load(CategoriesList.get(position).image).into(binding!!.imgCategory)
-        binding!!.txtCategoryName.setText(CategoriesList.get(position).name)
+        Glide.with(context).load(foodsList.get(position).image).into(binding!!.imgFoodList )
+        binding!!.txtFoodName.setText(foodsList.get(position).name)
+        binding!!.txtFoodPrice.setText(foodsList.get(position).price.toString())
 
         holder.setListner(object :IRecyclerItemClickLitner{
             override fun onItemClick(view: View, pos: Int) {
-                Common.categorySelected = CategoriesList.get(pos)
-                EventBus.getDefault().postSticky(CategoryClick(true,CategoriesList.get(pos)))
+               // Common.categorySelected = foodsList.get(pos)
+                //EventBus.getDefault().postSticky(CategoryClick(true,foodsList.get(pos)))
             }
 
         })
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return if (CategoriesList.size == 1)
-            Common.DEFAULT_COLUMN_COUNT
-        else {
-            if (CategoriesList.size % 2 == 0) {
-                Common.DEFAULT_COLUMN_COUNT
-            } else {
-                if (position > 1 && position == CategoriesList.size - 1) Common.FULL_WIDTH_COLUMN else Common.DEFAULT_COLUMN_COUNT
-            }
-        }
-
-//        return super.getItemViewType(position)
-    }
 
     override fun getItemCount(): Int {
-        return CategoriesList.size
+        return foodsList.size
     }
 }

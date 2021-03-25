@@ -1,8 +1,10 @@
 package com.communisolve.foodversy.common
 
+import com.communisolve.foodversy.model.CategoryModel
 import com.communisolve.foodversy.model.UserModel
 
 object Common {
+    lateinit var categorySelected: CategoryModel
     val CATEGORY_REF: String = "Category"
     val FULL_WIDTH_COLUMN: Int = 1
     val DEFAULT_COLUMN_COUNT: Int = 0
