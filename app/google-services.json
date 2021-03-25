@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "69868085762",
+    "firebase_url": "https://foodversy-default-rtdb.firebaseio.com",
     "project_id": "foodversy",
     "storage_bucket": "foodversy.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "69868085762-ecclk2qk1226thovcvbjjvs20svl6e5e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.communisolve.foodversy",
+            "certificate_hash": "13ad0040f6577856824fdb96a0b0b6345e23261d"
+          }
+        },
         {
           "client_id": "69868085762-02mu3iqr08iq1qrthqlp0up0hrdk36pd.apps.googleusercontent.com",
           "client_type": 3
