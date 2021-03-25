@@ -1,4 +1,4 @@
-package com.communisolve.ui.slideshow
+package com.communisolve.foodversy.ui.slideshow
 
 import android.os.Bundle
 import android.view.LayoutInflater

@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Foodversy">
         <activity
-            android:name="com.communisolve.HomeActivity"
+            android:name=".HomeActivity"
             android:label="@string/title_activity_home"
             android:theme="@style/Theme.Foodversy.NoActionBar"></activity>
         <activity android:name=".MainActivity">

@@ -1,4 +1,4 @@
-package com.communisolve.ui.slideshow
+package com.communisolve.foodversy.ui.slideshow
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

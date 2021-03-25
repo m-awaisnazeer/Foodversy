@@ -1,4 +1,4 @@
-package com.communisolve.adapter
+package com.communisolve.foodversy.adapter
 
 import android.content.Context
 import android.view.LayoutInflater

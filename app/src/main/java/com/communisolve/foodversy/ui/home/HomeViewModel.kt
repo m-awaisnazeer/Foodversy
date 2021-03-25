@@ -1,11 +1,11 @@
-package com.communisolve.ui.home
+package com.communisolve.foodversy.ui.home
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.communisolve.callbacks.IBestDealLoadCallback
-import com.communisolve.callbacks.IPopularLoadCallback
-import com.communisolve.common.Common
+import com.communisolve.foodversy.callbacks.IBestDealLoadCallback
+import com.communisolve.foodversy.callbacks.IPopularLoadCallback
+import com.communisolve.foodversy.common.Common
 import com.communisolve.foodversy.model.BestDealsModel
 import com.communisolve.foodversy.model.PopularCategoryModel
 import com.google.firebase.database.DataSnapshot

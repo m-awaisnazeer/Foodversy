@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="com.communisolve.ui.home.HomeFragment"
+        android:name="com.communisolve.foodversy.ui.home.HomeFragment"
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.communisolve.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/nav_menu"
+        android:name="com.communisolve.foodversy.ui.menu.MenuFragment"
+        android:label="@string/menu_categories"
+        tools:layout="@layout/fragment_categories" />
 
     <fragment
         android:id="@+id/nav_slideshow"
-        android:name="com.communisolve.ui.slideshow.SlideshowFragment"
+        android:name="com.communisolve.foodversy.ui.slideshow.SlideshowFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
 </navigation>
