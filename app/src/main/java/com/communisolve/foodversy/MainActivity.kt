@@ -9,7 +9,8 @@ import android.view.LayoutInflater
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.communisolve.Common.Common
+import com.communisolve.HomeActivity
+import com.communisolve.common.Common
 import com.communisolve.foodversy.databinding.ActivityMainBinding
 import com.communisolve.foodversy.model.UserModel
 import com.firebase.ui.auth.AuthUI
@@ -177,5 +178,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun gotoHomeActivity(userModel: UserModel?) {
         Common.currentUser = userModel
+        startActivity(Intent(this, HomeActivity::class.java))
+        finish()
     }
 }
