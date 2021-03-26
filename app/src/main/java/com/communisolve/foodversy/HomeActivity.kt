@@ -2,20 +2,19 @@ package com.communisolve.foodversy
 
 import android.os.Bundle
 import android.view.Menu
-import android.widget.Toast
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.navigation.NavigationView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import com.communisolve.foodversy.EventBus.CategoryClick
-import com.communisolve.foodversy.R
+import com.communisolve.foodversy.EventBus.FoodItemClick
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.navigation.NavigationView
+import com.google.android.material.snackbar.Snackbar
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -70,10 +69,18 @@ class HomeActivity : AppCompatActivity() {
         super.onStop()
     }
 
-    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
-    fun onCategorySelected(event:CategoryClick){
-        if (event.isClicked){
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onCategorySelected(event: CategoryClick) {
+        if (event.isClicked) {
             findNavController(R.id.nav_host_fragment).navigate(R.id.nav_foodListFragment)
+            //Toast.makeText(this, "${event.categoryModel.name}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onFoodSelected(event: FoodItemClick) {
+        if (event.isSuccess) {
+            findNavController(R.id.nav_host_fragment).navigate(R.id.nav_foodDetailsFragment)
             //Toast.makeText(this, "${event.categoryModel.name}", Toast.LENGTH_SHORT).show()
         }
     }

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.communisolve.foodversy.EventBus.CategoryClick
+import com.communisolve.foodversy.EventBus.FoodItemClick
 import com.communisolve.foodversy.callbacks.IRecyclerItemClickLitner
 import com.communisolve.foodversy.common.Common
 import com.communisolve.foodversy.databinding.LayoutCategoryItemBinding
@@ -50,8 +51,8 @@ class MyFoodListAdapter(
 
         holder.setListner(object :IRecyclerItemClickLitner{
             override fun onItemClick(view: View, pos: Int) {
-               // Common.categorySelected = foodsList.get(pos)
-                //EventBus.getDefault().postSticky(CategoryClick(true,foodsList.get(pos)))
+                Common.foodSelected = foodsList.get(pos)
+                EventBus.getDefault().postSticky(FoodItemClick(true,foodsList.get(pos)))
             }
 
         })

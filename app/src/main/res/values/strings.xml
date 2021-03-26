@@ -16,4 +16,7 @@
     <string name="menu_categories">Categories</string>
     <string name="food_list_fragment">Food List</string>
     <string name="name_of_food">Name of Food</string>
+    <string name="food_details_fragment">Food List</string>
+    <string name="food_name">Food Name</string>
+    <string name="description">Description</string>
 </resources>

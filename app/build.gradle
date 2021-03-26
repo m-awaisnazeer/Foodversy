@@ -90,4 +90,6 @@ dependencies {
 
     implementation 'androidx.activity:activity-ktx:1.2.1'
     implementation 'org.greenrobot:eventbus:3.2.0'
+    implementation 'com.cepheuen.elegant-number-button:lib:1.0.2'
+    implementation 'com.github.andremion:counterfab:1.2.0'
 }
