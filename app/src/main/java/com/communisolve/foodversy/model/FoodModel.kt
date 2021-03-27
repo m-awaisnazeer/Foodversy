@@ -13,6 +13,6 @@ class FoodModel(
     var ratingValue:Double = 0.toDouble()
     var ratingCount:Long = 0.toLong()
 
-     var userSelectedAddon:List<AddOnModel>?=null
+     var userSelectedAddon:MutableList<AddOnModel>?=null
     var userSelectedSize:SizeModel?=null
 }
