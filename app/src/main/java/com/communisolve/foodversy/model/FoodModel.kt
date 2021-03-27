@@ -1,6 +1,7 @@
 package com.communisolve.foodversy.model
 
 class FoodModel(
+    var key: String="",
     var name: String="",
     var image:String="",
     var id:String="",
@@ -9,5 +10,6 @@ class FoodModel(
     var addon:List<AddOnModel>?=ArrayList<AddOnModel>(),
     var size:List<SizeModel> = ArrayList<SizeModel>()
 ) {
-
+    var ratingValue:Double = 0.toDouble()
+    var ratingCount:Long = 0.toLong()
 }

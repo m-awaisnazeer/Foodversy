@@ -1,6 +1,7 @@
 package com.communisolve.foodversy.adapter
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,13 +47,19 @@ class MyCategoriesAdapter(
         Glide.with(context).load(CategoriesList.get(position).image).into(binding!!.imgCategory)
         binding!!.txtCategoryName.setText(CategoriesList.get(position).name)
 
-        holder.setListner(object :IRecyclerItemClickLitner{
-            override fun onItemClick(view: View, pos: Int) {
-                Common.categorySelected = CategoriesList.get(pos)
-                EventBus.getDefault().postSticky(CategoryClick(true,CategoriesList.get(pos)))
-            }
+        holder.itemView.setOnClickListener {
+            Common.categorySelected = CategoriesList.get(position)
+            Log.d("MTAG", "onBindViewHolder:${Common.categorySelected.menu_id} ")
+            EventBus.getDefault().postSticky(CategoryClick(true,CategoriesList.get(position)))
+        }
 
-        })
+//        holder.setListner(object :IRecyclerItemClickLitner{
+//            override fun onItemClick(view: View, pos: Int) {
+//                Common.categorySelected = CategoriesList.get(pos)
+//                EventBus.getDefault().postSticky(CategoryClick(true,CategoriesList.get(pos)))
+//            }
+//
+//        })
     }
 
     override fun getItemViewType(position: Int): Int {

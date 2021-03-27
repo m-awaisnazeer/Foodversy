@@ -49,6 +49,7 @@ class MenuViewModel : ViewModel(), ICategoryCallBackListner {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (itemsnapshot in snapshot.children) {
                     val model = itemsnapshot.getValue(CategoryModel::class.java)
+                    model!!.menu_id = itemsnapshot.key!!
                     templist.add(model!!)
                 }
                 iCategoryCallBackListner.onCategoryLoadSuccess(templist)

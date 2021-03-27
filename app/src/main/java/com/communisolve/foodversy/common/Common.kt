@@ -5,6 +5,7 @@ import com.communisolve.foodversy.model.FoodModel
 import com.communisolve.foodversy.model.UserModel
 
 object Common {
+    val COMMENT_REF: String="Comments"
     lateinit var foodSelected: FoodModel
     lateinit var categorySelected: CategoryModel
     val CATEGORY_REF: String = "Category"
