@@ -1,7 +1,6 @@
 package com.communisolve.foodversy.ui.fooddetail
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +19,9 @@ import com.communisolve.foodversy.model.CommentModel
 import com.communisolve.foodversy.model.FoodModel
 import com.communisolve.foodversy.ui.fooddetail.comment.CommentsFragment
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.*
 import dmax.dialog.SpotsDialog
@@ -40,6 +41,17 @@ class FoodDetailsFragment : Fragment() {
     private lateinit var txt_food_description: TextView
     private lateinit var btnShowComment: MaterialButton
 
+    //Size Layout
+    private lateinit var rdi_group_size: RadioGroup
+    private lateinit var img_add_addon: ImageView
+    private lateinit var chip_group_user_selected_addon: ChipGroup
+
+    //AddOn Layout
+    private var chip_group_addon: ChipGroup? = null
+    private var edt_search_addOn: EditText? = null
+
+    //Dialog
+    private lateinit var addOnBottomSheetDialog: BottomSheetDialog
     private var waitingDialog: android.app.AlertDialog? = null
 
     private val viewModel: FoodDetailsViewModel by viewModels()
@@ -58,19 +70,66 @@ class FoodDetailsFragment : Fragment() {
                 txt_food_description.setText(this.description)
                 txt_food_price.setText(this.price.toString())
                 txt_food_name.setText(this.name)
-
                 ratingBar.rating = this.ratingValue.toFloat()
+
+                for (sizeModel in it.size) {
+                    val radioButton = RadioButton(context)
+                    radioButton.setOnCheckedChangeListener { buttonView, isChecked ->
+                        if (isChecked)
+                            Common.foodSelected.userSelectedSize = sizeModel
+                        calculateTotalPrice()
+                    }
+
+                    val params = LinearLayout.LayoutParams(
+                        0, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f
+                    )
+                    radioButton.layoutParams = params
+                    radioButton.text = sizeModel.name
+                    radioButton.tag = sizeModel.price
+
+                    rdi_group_size.addView(radioButton)
+
+                    //Default first radio button select
+                    if (rdi_group_size.childCount > 0) {
+                        val radioButton = rdi_group_size.getChildAt(0) as RadioButton
+                        radioButton.isChecked = true
+                    }
+                }
             }
         })
         return root
     }
 
+    private fun calculateTotalPrice() {
+        var totalPrice = Common.foodSelected.price.toDouble()
+        var displayPrice = 0.0
+
+        //size
+        totalPrice += Common.foodSelected.userSelectedSize!!.price.toDouble()
+
+        displayPrice = totalPrice * number_button.number.toInt()
+        displayPrice = Math.round(displayPrice * 100.0) / 100.0
+
+        txt_food_price.text = StringBuilder("").append(Common.formatPrice(displayPrice))
+    }
+
     private fun initView(root: View?) {
+
+        addOnBottomSheetDialog = BottomSheetDialog(requireContext(), R.style.DialogStyle)
+        val layout_user_selected_addon = layoutInflater.inflate(R.layout.layout_addon_display, null)
+        chip_group_addon = layout_user_selected_addon.findViewById(R.id.chip_group_addon)
+        edt_search_addOn = layout_user_selected_addon.findViewById(R.id.edt_search_addOn)
+
+        addOnBottomSheetDialog.setContentView(layout_user_selected_addon)
+
+        addOnBottomSheetDialog.setOnDismissListener { dialogInterface ->
+            displayUserSelectedAddon()
+            calculateTotalPrice()
+        }
 
         waitingDialog =
             SpotsDialog.Builder().setContext(requireContext()).setCancelable(false).build()
-
-
+        rdi_group_size = root!!.findViewById(R.id.rdi_group_size)
         collapsing_toolbar = root!!.findViewById(R.id.collapsing_toolbar)
         img_food = root.findViewById(R.id.img_food)
         btnCart = root.findViewById(R.id.btnCart)
@@ -81,6 +140,8 @@ class FoodDetailsFragment : Fragment() {
         ratingBar = root.findViewById(R.id.rating_bar)
         txt_food_description = root.findViewById(R.id.txt_food_description)
         btnShowComment = root.findViewById(R.id.btnShowComment)
+        img_add_addon = root.findViewById(R.id.img_add_addon)
+        chip_group_user_selected_addon = root.findViewById(R.id.chip_group_user_selected_addon)
 
         btn_ratting.setOnClickListener {
             showDialogRating()
@@ -88,12 +149,24 @@ class FoodDetailsFragment : Fragment() {
 
         btnShowComment.setOnClickListener {
             val commentFragment = CommentsFragment.getInstance()
-            commentFragment.show(requireActivity().supportFragmentManager,"CommentsFragment")
+            commentFragment.show(requireActivity().supportFragmentManager, "CommentsFragment")
         }
 
         viewModel.getMutableLiveDataComment().observe(viewLifecycleOwner, Observer {
             submitRatingtoFirebase(it)
         })
+    }
+
+    private fun displayUserSelectedAddon() {
+        if (Common.foodSelected.userSelectedAddon !=null && Common.foodSelected.userSelectedAddon!!.size >0){
+            chip_group_user_selected_addon.removeAllViews()
+
+            for (addonModel in Common.foodSelected.userSelectedAddon!!)
+            {
+                val chip = layoutInflater.inflate(R.layout.layout_chip_with_delete,null,false)
+
+            }
+        }
     }
 
     private fun submitRatingtoFirebase(commentModel: CommentModel?) {

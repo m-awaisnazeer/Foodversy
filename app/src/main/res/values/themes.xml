@@ -26,4 +26,11 @@
     <style name="ToolbarColoredBackArrow" parent="Theme.Foodversy">
         <item name="android:textColorSecondary">@android:color/black</item>
     </style>
+
+    <style name="DialogStyle" parent="Theme.Design.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor" tools:ignore="NewApi">@android:color/transparent</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+
 </resources>
