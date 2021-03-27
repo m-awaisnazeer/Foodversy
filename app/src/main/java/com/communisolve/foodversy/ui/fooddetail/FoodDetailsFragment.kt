@@ -18,6 +18,7 @@ import com.communisolve.foodversy.R
 import com.communisolve.foodversy.common.Common
 import com.communisolve.foodversy.model.CommentModel
 import com.communisolve.foodversy.model.FoodModel
+import com.communisolve.foodversy.ui.fooddetail.comment.CommentsFragment
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -83,6 +84,11 @@ class FoodDetailsFragment : Fragment() {
 
         btn_ratting.setOnClickListener {
             showDialogRating()
+        }
+
+        btnShowComment.setOnClickListener {
+            val commentFragment = CommentsFragment.getInstance()
+            commentFragment.show(requireActivity().supportFragmentManager,"CommentsFragment")
         }
 
         viewModel.getMutableLiveDataComment().observe(viewLifecycleOwner, Observer {
