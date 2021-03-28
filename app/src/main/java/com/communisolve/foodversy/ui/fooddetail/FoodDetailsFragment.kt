@@ -100,6 +100,12 @@ class FoodDetailsFragment : Fragment(), TextWatcher {
                 }
             }
         })
+
+        number_button.setOnValueChangeListener { view, oldValue, newValue ->
+            if (oldValue != newValue){
+                calculateTotalPrice()
+            }
+        }
         return root
     }
 

@@ -11,12 +11,21 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.andremion.counterfab.CounterFab
 import com.communisolve.foodversy.EventBus.CategoryClick
+import com.communisolve.foodversy.EventBus.CounterCartEvent
 import com.communisolve.foodversy.EventBus.FoodItemClick
 import com.communisolve.foodversy.common.Common
+import com.communisolve.foodversy.database.CartDataSource
+import com.communisolve.foodversy.database.CartDatabase
+import com.communisolve.foodversy.database.LocalCartDataSource
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
+import io.reactivex.SingleObserver
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -24,14 +33,18 @@ import org.greenrobot.eventbus.ThreadMode
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var cartDataSource: CartDataSource
+    private lateinit var  fab: CounterFab
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+
+        cartDataSource = LocalCartDataSource(CartDatabase.getInstance(this).CartDao())
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val fab: FloatingActionButton = findViewById(R.id.fab)
+         fab = findViewById(R.id.counter_fab)
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
@@ -48,8 +61,14 @@ class HomeActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        counterCartItem()
     }
 
+    override fun onResume() {
+        super.onResume()
+        counterCartItem()
+    }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.home, menu)
@@ -84,5 +103,33 @@ class HomeActivity : AppCompatActivity() {
         if (event.isSuccess) {
             findNavController(R.id.nav_host_fragment).navigate(R.id.nav_foodDetailsFragment)
         }
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onCounterCartEvent(event: CounterCartEvent) {
+        if (event.isSuccess) {
+            counterCartItem()
+        }
+    }
+
+    private fun counterCartItem() {
+        cartDataSource.countItemInCart(Common.currentUser!!.uid)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : SingleObserver<Int> {
+                override fun onSubscribe(d: Disposable) {
+
+
+                }
+
+                override fun onSuccess(t: Int) {
+                    fab.count = t
+                }
+
+                override fun onError(e: Throwable) {
+                    Toast.makeText(this@HomeActivity, "${e.message}", Toast.LENGTH_SHORT).show()
+                }
+
+            })
     }
 }

@@ -44,5 +44,10 @@ class FoodListFragment : Fragment() {
         return root
     }
 
+    override fun onStop() {
+        if (adapter !=null)
+            adapter.onStop()
+        super.onStop()
+    }
 
 }

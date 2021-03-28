@@ -15,6 +15,9 @@ class CartItem(
     @ColumnInfo(name = "foodName")
     var foodName:String="",
 
+    @ColumnInfo(name = "foodImage")
+    var foodImage:String="",
+
     @ColumnInfo(name = "foodPrice")
     var foodPrice:Double=0.0,
 
