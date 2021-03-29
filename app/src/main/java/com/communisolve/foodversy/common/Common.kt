@@ -14,6 +14,29 @@ object Common {
         } else return "0,00"
     }
 
+    fun calculateExtraPrice(
+        userSelectedSize: SizeModel?,
+        userSelectedAddon: MutableList<AddOnModel>?
+    ): Double {
+        var result: Double = 0.0
+        if (userSelectedSize == null && userSelectedAddon == null) {
+            return 0.0
+        } else if (userSelectedSize == null) {
+            for (addonModel in userSelectedAddon!!) {
+                result += addonModel.price.toDouble()
+            }
+            return result
+        } else if (userSelectedAddon == null) {
+            result = userSelectedSize.price.toDouble()
+            return result
+        } else {
+            result = userSelectedSize.price.toDouble()
+            for (addonModel in userSelectedAddon!!)
+                result += addonModel.price.toDouble()
+            return result
+        }
+    }
+
     val COMMENT_REF: String = "Comments"
     lateinit var foodSelected: FoodModel
     lateinit var categorySelected: CategoryModel

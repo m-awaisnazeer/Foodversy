@@ -30,10 +30,21 @@ class LocalCartDataSource(private var cartDao: CartDao) : CartDataSource {
     }
 
     override fun deleteCart(cartItem: CartItem): Single<Int> {
-return cartDao.deleteCart(cartItem)   }
+        return cartDao.deleteCart(cartItem)
+    }
 
     override fun cleanCart(uid: String): Single<Int> {
-return cartDao.cleanCart(uid)   }
+        return cartDao.cleanCart(uid)
+    }
+
+    override fun getItemWithAllOptionsInCart(
+        uid: String,
+        foodId: String,
+        foodsize: String,
+        foodAddon: String
+    ): Single<CartItem> {
+        return cartDao.getItemWithAllOptionsInCart(uid, foodId, foodsize, foodAddon)
+    }
 
 
 }

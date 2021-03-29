@@ -21,4 +21,11 @@ interface CartDataSource {
     fun deleteCart(cartItem: CartItem): Single<Int>
 
     fun cleanCart(uid: String): Single<Int>
+
+    fun getItemWithAllOptionsInCart(
+        uid: String,
+        foodId: String,
+        foodsize: String,
+        foodAddon: String
+    ): Single<CartItem>
 }
