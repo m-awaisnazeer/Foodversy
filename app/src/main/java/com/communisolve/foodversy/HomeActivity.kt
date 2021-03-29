@@ -143,7 +143,12 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 override fun onError(e: Throwable) {
-                    Toast.makeText(this@HomeActivity, "${e.message}", Toast.LENGTH_SHORT).show()
+                    if (e.message!!.contains("empty")) {
+                       // Toast.makeText(this@HomeActivity, "Empty Cart", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@HomeActivity, "${e.message}", Toast.LENGTH_SHORT).show()
+
+                    }
                 }
 
             })

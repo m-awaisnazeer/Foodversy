@@ -3,9 +3,7 @@ package com.communisolve.foodversy.ui.cart
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcelable
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
@@ -21,10 +19,12 @@ import com.communisolve.foodversy.EventBus.UpdateItemInCart
 import com.communisolve.foodversy.R
 import com.communisolve.foodversy.adapter.MyCartAdapter
 import com.communisolve.foodversy.callbacks.IMyButtonCallback
+import com.communisolve.foodversy.callbacks.IOnCartItemMenuClickListner
 import com.communisolve.foodversy.common.Common
 import com.communisolve.foodversy.common.MySwipeHelper
 import com.communisolve.foodversy.database.CartDataSource
 import com.communisolve.foodversy.database.CartDatabase
+import com.communisolve.foodversy.database.CartItem
 import com.communisolve.foodversy.database.LocalCartDataSource
 import com.google.android.material.button.MaterialButton
 import io.reactivex.SingleObserver
@@ -36,7 +36,7 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 
-class CartFragment : Fragment() {
+class CartFragment : Fragment(), IOnCartItemMenuClickListner {
 
     //views
     private lateinit var recycler_cart: RecyclerView
@@ -45,14 +45,13 @@ class CartFragment : Fragment() {
     private lateinit var btn_place_order: MaterialButton
     private lateinit var group_place_order: CardView
     private var recyclerViewState: Parcelable? = null
+    private lateinit var adapter: MyCartAdapter
     private val cartViewModel: CartViewModel by viewModels()
 
 
     //Database
     private lateinit var compositeDisposable: CompositeDisposable
     private lateinit var cartDataSource: CartDataSource
-
-    private lateinit var adapter: MyCartAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -76,7 +75,7 @@ class CartFragment : Fragment() {
                 recycler_cart.visibility = View.VISIBLE
                 group_place_order.visibility = View.VISIBLE
                 txt_empty_cart.visibility = View.GONE
-                adapter = MyCartAdapter(requireContext(), it)
+                adapter = MyCartAdapter(requireContext(),this, it,)
                 recycler_cart.adapter = adapter
             }
         })
@@ -84,6 +83,7 @@ class CartFragment : Fragment() {
     }
 
     private fun initViews(root: View?) {
+        setHasOptionsMenu(true) //if we not add it, menu will never be inflace
         txt_empty_cart = root!!.findViewById(R.id.txt_empty_cart)
         txt_total_price = root.findViewById(R.id.txt_total_price)
         btn_place_order = root.findViewById(R.id.btn_place_order)
@@ -99,7 +99,9 @@ class CartFragment : Fragment() {
             )
         )
 
-        val swipe = object :MySwipeHelper(requireContext(),recycler_cart,200)
+
+        /*
+           val swipe = object :MySwipeHelper(requireContext(),recycler_cart,200)
         {
             override fun instantiateMyButton(
                 viewHolder: RecyclerView.ViewHolder,
@@ -120,6 +122,7 @@ class CartFragment : Fragment() {
             }
 
         }
+         */
     }
 
     override fun onStop() {
@@ -193,9 +196,77 @@ class CartFragment : Fragment() {
                 }
 
                 override fun onError(e: Throwable) {
+                    if (e.message!!.contains("empty"))
+                    {
+
+                    }else{
+                        Toast.makeText(requireContext(), "${e.message}", Toast.LENGTH_SHORT).show()
+                    }                }
+
+            })
+    }
+
+    override fun onDeleteselected(position: Int, deletedCartItem: CartItem) {
+        cartDataSource.deleteCart(deletedCartItem)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : SingleObserver<Int> {
+                override fun onSubscribe(d: Disposable) {
+
+
+                }
+
+                override fun onSuccess(t: Int) {
+                    Toast.makeText(
+                        requireContext(),
+                        "${deletedCartItem.foodName} Deleted",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    //adapter.notifyItemRemoved(position)
+                    EventBus.getDefault().postSticky(CounterCartEvent(true))
+                    calculateTotalPrice()
+                }
+
+                override fun onError(e: Throwable) {
                     Toast.makeText(requireContext(), "${e.message}", Toast.LENGTH_SHORT).show()
                 }
 
             })
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        menu.findItem(R.id.action_settings).setVisible(false)
+        super.onPrepareOptionsMenu(menu)
+    }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.cart_menu,menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_clear_cart){
+
+            cartDataSource.cleanCart(Common.currentUser!!.uid)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : SingleObserver<Int> {
+                    override fun onSubscribe(d: Disposable) {
+
+                    }
+
+                    override fun onSuccess(t: Int) {
+                        calculateTotalPrice()
+                        group_place_order.visibility = View.GONE
+                        EventBus.getDefault().postSticky(CounterCartEvent(true))
+                    }
+
+                    override fun onError(e: Throwable) {
+                        Toast.makeText(requireContext(), "${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+
+                })
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

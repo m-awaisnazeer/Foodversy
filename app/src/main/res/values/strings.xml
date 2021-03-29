@@ -24,4 +24,6 @@
     <string name="menu_cart">Cart</string>
     <string name="empty_cart">EMPTY CART</string>
     <string name="dummy_total">Total: 0,0</string>
+    <string name="delete">Delete</string>
+    <string name="action_clear_cart">Clear Cart</string>
 </resources>

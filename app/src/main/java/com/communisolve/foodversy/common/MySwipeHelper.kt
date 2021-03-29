@@ -141,7 +141,7 @@ abstract class MySwipeHelper(
             var y = 0f
             if (imageResId == 0) {
                 x = cWidth / 2f - r.width() / 2f - r.left.toFloat()
-                y = cWidth / 2f + r.width() / 2f - r.bottom
+                y = cHeight / 2f + r.width() / 2f - r.bottom
                 c.drawText(text, rectf.left + x, rectf.top + y, p)
             } else { // if drawable
                 val d = ContextCompat.getDrawable(context, imageResId)
@@ -234,7 +234,7 @@ abstract class MySwipeHelper(
             }
         }
 
-        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+        super.onChildDraw(c, recyclerView, viewHolder, translationX, dY, actionState, isCurrentlyActive)
     }
 
     private fun drawButton(
