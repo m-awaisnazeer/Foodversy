@@ -13,7 +13,7 @@ class LocalCartDataSource(private var cartDao: CartDao) : CartDataSource {
         return cartDao.countItemInCart(uid)
     }
 
-    override fun sumPrice(uid: String): Single<Long> {
+    override fun sumPrice(uid: String): Single<Double> {
         return cartDao.sumPrice(uid)
     }
 

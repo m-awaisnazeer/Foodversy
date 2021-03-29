@@ -2,6 +2,7 @@ package com.communisolve.foodversy
 
 import android.os.Bundle
 import android.view.Menu
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -16,6 +17,7 @@ import com.andremion.counterfab.CounterFab
 import com.communisolve.foodversy.EventBus.CategoryClick
 import com.communisolve.foodversy.EventBus.CounterCartEvent
 import com.communisolve.foodversy.EventBus.FoodItemClick
+import com.communisolve.foodversy.EventBus.HideFabCart
 import com.communisolve.foodversy.common.Common
 import com.communisolve.foodversy.database.CartDataSource
 import com.communisolve.foodversy.database.CartDatabase
@@ -39,12 +41,12 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-
+        fab = findViewById(R.id.counter_fab)
         cartDataSource = LocalCartDataSource(CartDatabase.getInstance(this).CartDao())
+        counterCartItem()
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        fab = findViewById(R.id.counter_fab)
 
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
@@ -67,6 +69,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+        counterCartItem()
         super.onResume()
         counterCartItem()
     }
@@ -113,6 +116,17 @@ class HomeActivity : AppCompatActivity() {
             counterCartItem()
         }
     }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onCartFabHide(event: HideFabCart) {
+        if (event.isHide) {
+            fab.hide()
+        }else{
+            fab.show()
+        }
+    }
+
+
 
     private fun counterCartItem() {
         cartDataSource.countItemInCart(Common.currentUser!!.uid)
