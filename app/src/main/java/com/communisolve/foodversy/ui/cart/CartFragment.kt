@@ -1,5 +1,6 @@
 package com.communisolve.foodversy.ui.cart
 
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
@@ -19,11 +20,12 @@ import com.communisolve.foodversy.EventBus.HideFabCart
 import com.communisolve.foodversy.EventBus.UpdateItemInCart
 import com.communisolve.foodversy.R
 import com.communisolve.foodversy.adapter.MyCartAdapter
+import com.communisolve.foodversy.callbacks.IMyButtonCallback
 import com.communisolve.foodversy.common.Common
+import com.communisolve.foodversy.common.MySwipeHelper
 import com.communisolve.foodversy.database.CartDataSource
 import com.communisolve.foodversy.database.CartDatabase
 import com.communisolve.foodversy.database.LocalCartDataSource
-import com.communisolve.foodversy.ui.fooddetail.comment.CommentsFragment
 import com.google.android.material.button.MaterialButton
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -82,7 +84,11 @@ class CartFragment : Fragment() {
     }
 
     private fun initViews(root: View?) {
-        recycler_cart = root!!.findViewById(R.id.recycler_cart)
+        txt_empty_cart = root!!.findViewById(R.id.txt_empty_cart)
+        txt_total_price = root.findViewById(R.id.txt_total_price)
+        btn_place_order = root.findViewById(R.id.btn_place_order)
+        group_place_order = root.findViewById(R.id.group_place_order)
+        recycler_cart = root.findViewById(R.id.recycler_cart)
         recycler_cart.setHasFixedSize(true)
         val layoutManager = LinearLayoutManager(requireContext())
         recycler_cart.layoutManager = layoutManager
@@ -92,10 +98,28 @@ class CartFragment : Fragment() {
                 layoutManager.orientation
             )
         )
-        txt_empty_cart = root.findViewById(R.id.txt_empty_cart)
-        txt_total_price = root.findViewById(R.id.txt_total_price)
-        btn_place_order = root.findViewById(R.id.btn_place_order)
-        group_place_order = root.findViewById(R.id.group_place_order)
+
+        val swipe = object :MySwipeHelper(requireContext(),recycler_cart,200)
+        {
+            override fun instantiateMyButton(
+                viewHolder: RecyclerView.ViewHolder,
+                buffer: MutableList<MyButton>
+            ) {
+                buffer.add(MyButton(context!!,
+                    "Delete",
+                    30.toString(),
+                    0,
+                    Color.parseColor("#FF3C30"),
+                    object : IMyButtonCallback {
+                        override fun onClick(pos: Int) {
+                            Toast.makeText(context, "Delete Item", Toast.LENGTH_SHORT).show()
+                        }
+
+                    }
+                ))
+            }
+
+        }
     }
 
     override fun onStop() {
@@ -164,7 +188,8 @@ class CartFragment : Fragment() {
                 }
 
                 override fun onSuccess(price: Double) {
-                    txt_total_price.text = StringBuilder("Total: ").append(Common.formatPrice(price))
+                    txt_total_price.text =
+                        StringBuilder("Total: ").append(Common.formatPrice(price))
                 }
 
                 override fun onError(e: Throwable) {
