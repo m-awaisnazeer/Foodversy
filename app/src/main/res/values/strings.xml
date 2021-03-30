@@ -27,4 +27,7 @@
     <string name="delete">Delete</string>
     <string name="action_clear_cart">Clear Cart</string>
     <string name="sign_out">Sign Out</string>
+    <string name="enter_your_address">Enter Your address</string>
+    <string name="cash_on_delivery">Cash On Delivery</string>
+    <string name="online_payment">Online Payment</string>
 </resources>

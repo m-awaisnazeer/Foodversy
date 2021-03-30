@@ -1,9 +1,12 @@
 package com.communisolve.foodversy.ui.cart
 
+import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.*
+import android.widget.EditText
+import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
@@ -100,6 +103,53 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
         )
 
 
+        btn_place_order.setOnClickListener {
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle("One more step!")
+
+            val view = LayoutInflater.from(requireContext()).inflate(R.layout.layout_place_order,null)
+            val edt_address = view.findViewById(R.id.edt_address) as EditText
+            val rdi_home_address = view.findViewById(R.id.rdi_home_address) as RadioButton
+            val rdi_other_address = view.findViewById(R.id.rdi_other_address) as RadioButton
+            val rdi_ship_this_address = view.findViewById(R.id.rdi_ship_this_address) as RadioButton
+            val rdi_cod = view.findViewById(R.id.rdi_cod) as RadioButton
+            val rdi_online = view.findViewById(R.id.rdi_online) as RadioButton
+
+            edt_address.setText("${Common.currentUser!!.address}")
+
+            rdi_home_address.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked){
+                    edt_address.setText("${Common.currentUser!!.address}")
+                }
+            }
+
+            rdi_other_address.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked){
+                    edt_address.setText("")
+                    //edt_address.setHint("Enter Your Address")
+                }
+            }
+
+            rdi_ship_this_address.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked){
+                    Toast.makeText(
+                        requireContext(),
+                        "Implement late with Google API",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            builder.setView(view)
+            builder.setNegativeButton("NO",{dialog,_-> dialog.dismiss()})
+            builder.setPositiveButton("YES", { dialog, _ ->
+                Toast.makeText(requireContext(), "Implement Late", Toast.LENGTH_SHORT).show()
+            })
+
+            val dialog = builder.create()
+            dialog.show()
+
+        }
         /*
            val swipe = object :MySwipeHelper(requireContext(),recycler_cart,200)
         {
@@ -192,7 +242,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
 
                 override fun onSuccess(price: Double) {
                     txt_total_price.text =
-                        StringBuilder("Total: ").append(Common.formatPrice(price))
+                        StringBuilder("Total: $").append(Common.formatPrice(price))
                 }
 
                 override fun onError(e: Throwable) {

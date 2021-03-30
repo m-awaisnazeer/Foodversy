@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/edt_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/enter_your_address" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delivery Method"
+        android:textColor="@color/dialog_header_color"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+        <RadioButton
+            android:id="@+id/rdi_home_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Home Address"
+            android:textColor="@color/dialog_text_color"
+            android:textSize="18sp"
+            android:textStyle="italic" />
+
+        <RadioButton
+            android:id="@+id/rdi_other_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Other Address"
+            android:textColor="@color/dialog_text_color"
+            android:textSize="18sp"
+            android:textStyle="italic" />
+
+        <RadioButton
+            android:id="@+id/rdi_ship_this_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Ship to this Address"
+            android:textColor="@color/dialog_text_color"
+            android:textSize="18sp"
+            android:textStyle="italic" />
+
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Payment Method"
+        android:textColor="@color/dialog_header_color"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/rdi_cod"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/cash_on_delivery"
+            android:textColor="@color/dialog_header_color"
+            android:textSize="18sp"
+            android:textStyle="italic" />
+
+        <RadioButton
+            android:id="@+id/rdi_online"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/online_payment"
+            android:textColor="@color/dialog_header_color"
+            android:textSize="18sp"
+            android:textStyle="italic" />
+
+    </RadioGroup>
+
+</LinearLayout>
