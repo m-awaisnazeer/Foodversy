@@ -3,6 +3,7 @@ package com.communisolve.foodversy.ui.cart
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.graphics.Color
+import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
@@ -34,14 +35,19 @@ import com.communisolve.foodversy.database.CartItem
 import com.communisolve.foodversy.database.LocalCartDataSource
 import com.google.android.gms.location.*
 import com.google.android.material.button.MaterialButton
+import io.reactivex.Single
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.internal.operators.single.SingleCache
+import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import java.io.IOException
+import java.util.*
 
 class CartFragment : Fragment(), IOnCartItemMenuClickListner {
 
@@ -185,9 +191,25 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                                 .append(task.result.longitude)
                                 .toString()
 
-                            edt_address.setText(cooridate)
-                            txt_address_detail.visibility = View.VISIBLE
-                            txt_address_detail.setText("Implement late with Google API")
+                            val singleAddress = Single.just(getAddressFromLatLng(task.result.latitude,
+                            task.result.longitude))
+
+                            val  disposable = singleAddress.subscribeWith(object :
+                                DisposableSingleObserver<String>() {
+                                override fun onSuccess(t: String) {
+                                    edt_address.setText(cooridate)
+                                    txt_address_detail.visibility = View.VISIBLE
+                                    txt_address_detail.setText(t)
+                                }
+
+                                override fun onError(e: Throwable) {
+                                    edt_address.setText(cooridate)
+                                    txt_address_detail.visibility = View.VISIBLE
+                                    txt_address_detail.setText(e.message)                                }
+
+                            })
+
+
                         }.addOnFailureListener { e->
                             txt_address_detail.visibility = View.GONE
                             Toast.makeText(requireContext(), "${e.message}", Toast.LENGTH_SHORT).show()
@@ -228,6 +250,24 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
 
         }
          */
+    }
+
+    private fun getAddressFromLatLng(latitude: Double, longitude: Double): String {
+        val geoCoder = Geocoder(context, Locale.getDefault())
+        var result:String?=null
+        try {
+            val addressList = geoCoder.getFromLocation(latitude,longitude,1)
+            if (addressList !=null && addressList.size >0){
+                val address = addressList[0]
+                val sb = StringBuilder(address.getAddressLine(0))
+                result = sb.toString()
+            }else{
+                result = "Address not found!"
+            }
+            return result
+        }catch (e:IOException){
+            return e.message!!
+        }
     }
 
     override fun onStop() {
