@@ -3,6 +3,7 @@ package com.communisolve.foodversy.common
 import com.communisolve.foodversy.model.*
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import kotlin.random.Random
 
 object Common {
     fun formatPrice(price: Double): String {
@@ -37,6 +38,14 @@ object Common {
         }
     }
 
+    fun createOrderNumber(): String {
+        return StringBuilder()
+            .append(System.currentTimeMillis())
+            .append(Math.abs(Random.nextInt()))
+            .toString()
+    }
+
+    val ORDER_REF: String="Orders"
     val COMMENT_REF: String = "Comments"
      var foodSelected: FoodModel?=null
      var categorySelected: CategoryModel?=null

@@ -2,7 +2,6 @@ package com.communisolve.foodversy.ui.cart
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.graphics.Color
 import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
@@ -25,22 +24,21 @@ import com.communisolve.foodversy.EventBus.HideFabCart
 import com.communisolve.foodversy.EventBus.UpdateItemInCart
 import com.communisolve.foodversy.R
 import com.communisolve.foodversy.adapter.MyCartAdapter
-import com.communisolve.foodversy.callbacks.IMyButtonCallback
 import com.communisolve.foodversy.callbacks.IOnCartItemMenuClickListner
 import com.communisolve.foodversy.common.Common
-import com.communisolve.foodversy.common.MySwipeHelper
 import com.communisolve.foodversy.database.CartDataSource
 import com.communisolve.foodversy.database.CartDatabase
 import com.communisolve.foodversy.database.CartItem
 import com.communisolve.foodversy.database.LocalCartDataSource
+import com.communisolve.foodversy.model.Order
 import com.google.android.gms.location.*
 import com.google.android.material.button.MaterialButton
+import com.google.firebase.database.FirebaseDatabase
 import io.reactivex.Single
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.internal.operators.single.SingleCache
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
 import org.greenrobot.eventbus.EventBus
@@ -62,10 +60,10 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
     private val cartViewModel: CartViewModel by viewModels()
 
 
-    private lateinit var locationRequest:LocationRequest
+    private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private lateinit var currentLocation:Location
+    private lateinit var currentLocation: Location
 
 
     //Database
@@ -95,7 +93,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                 recycler_cart.visibility = View.VISIBLE
                 group_place_order.visibility = View.VISIBLE
                 txt_empty_cart.visibility = View.GONE
-                adapter = MyCartAdapter(requireContext(),this, it,)
+                adapter = MyCartAdapter(requireContext(), this, it)
                 recycler_cart.adapter = adapter
             }
         })
@@ -106,12 +104,17 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
     private fun initLocation() {
         buildLocationRequest()
         buildLocationCallback()
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest,locationCallback, Looper.getMainLooper())
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireContext())
+        fusedLocationProviderClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.getMainLooper()
+        )
     }
 
     private fun buildLocationCallback() {
-        locationCallback = object :LocationCallback(){
+        locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
                 currentLocation = locationResult.lastLocation
@@ -151,7 +154,8 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
             val builder = AlertDialog.Builder(requireContext())
             builder.setTitle("One more step!")
 
-            val view = LayoutInflater.from(requireContext()).inflate(R.layout.layout_place_order,null)
+            val view =
+                LayoutInflater.from(requireContext()).inflate(R.layout.layout_place_order, null)
             val edt_address = view.findViewById(R.id.edt_address) as EditText
             val edt_comment = view.findViewById(R.id.edt_comment) as EditText
             //val txt_address = view.findViewById<TextView>(R.id.txt_address_detail)
@@ -165,7 +169,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
             edt_address.setText("${Common.currentUser!!.address}")
 
             rdi_home_address.setOnCheckedChangeListener { buttonView, isChecked ->
-                if (isChecked){
+                if (isChecked) {
                     edt_address.setText("${Common.currentUser!!.address}")
                     txt_address_detail.visibility = View.GONE
 
@@ -173,7 +177,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
             }
 
             rdi_other_address.setOnCheckedChangeListener { buttonView, isChecked ->
-                if (isChecked){
+                if (isChecked) {
                     edt_address.setText("")
                     //edt_address.setHint("Enter Your Address")
                     txt_address_detail.visibility = View.GONE
@@ -182,19 +186,23 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
             }
 
             rdi_ship_this_address.setOnCheckedChangeListener { buttonView, isChecked ->
-                if (isChecked){
+                if (isChecked) {
                     fusedLocationProviderClient.lastLocation
-                        .addOnCompleteListener { task->
+                        .addOnCompleteListener { task ->
                             val cooridate = StringBuilder()
                                 .append(task.result!!.latitude)
                                 .append("/")
                                 .append(task.result.longitude)
                                 .toString()
 
-                            val singleAddress = Single.just(getAddressFromLatLng(task.result.latitude,
-                            task.result.longitude))
+                            val singleAddress = Single.just(
+                                getAddressFromLatLng(
+                                    task.result.latitude,
+                                    task.result.longitude
+                                )
+                            )
 
-                            val  disposable = singleAddress.subscribeWith(object :
+                            val disposable = singleAddress.subscribeWith(object :
                                 DisposableSingleObserver<String>() {
                                 override fun onSuccess(t: String) {
                                     edt_address.setText(cooridate)
@@ -205,22 +213,27 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                                 override fun onError(e: Throwable) {
                                     edt_address.setText(cooridate)
                                     txt_address_detail.visibility = View.VISIBLE
-                                    txt_address_detail.setText(e.message)                                }
+                                    txt_address_detail.setText(e.message)
+                                }
 
                             })
 
 
-                        }.addOnFailureListener { e->
+                        }.addOnFailureListener { e ->
                             txt_address_detail.visibility = View.GONE
-                            Toast.makeText(requireContext(), "${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "${e.message}", Toast.LENGTH_SHORT)
+                                .show()
                         }
                 }
             }
 
             builder.setView(view)
-            builder.setNegativeButton("NO",{dialog,_-> dialog.dismiss()})
+            builder.setNegativeButton("NO", { dialog, _ -> dialog.dismiss() })
             builder.setPositiveButton("YES") { dialog, _ ->
-                Toast.makeText(requireContext(), "Implement Late", Toast.LENGTH_SHORT).show()
+                if (rdi_cod.isChecked) {
+                    paymentCOD(edt_address.text.toString(), edt_comment.text.toString())
+                }
+
             }
 
             val dialog = builder.create()
@@ -252,20 +265,105 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
          */
     }
 
+    private fun paymentCOD(address: String, comment: String) {
+        compositeDisposable.add(
+            cartDataSource.getAllCart(Common.currentUser!!.uid!!)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ cartListItem ->
+
+                    //when we have all cart items, we will get total price
+                    cartDataSource.sumPrice(Common.currentUser!!.uid!!)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(object : SingleObserver<Double> {
+                            override fun onSubscribe(d: Disposable) {
+
+                            }
+
+                            override fun onSuccess(totalPrice: Double) {
+                                val finalPrice = totalPrice
+                                if (currentLocation != null) {
+                                    val order = Order(
+                                        userId = Common.currentUser!!.uid,
+                                        userName = Common.currentUser!!.name,
+                                        userPhone = Common.currentUser!!.phone,
+                                        shippingAddress = address,
+                                        comment= comment,
+                                        lat = currentLocation.latitude,
+                                        lng = currentLocation.longitude,
+                                        cartItemList = cartListItem,
+                                        totalPayment = totalPrice,
+                                        finalPayment = finalPrice,
+                                        discount = 0,
+                                        isCod = true,
+                                        transactionId = "Cash On Delivery"
+                                        )
+
+                                    //submit to Firebase
+                                    writeOrderToFirebase(order)
+                                }
+                            }
+
+                            override fun onError(e: Throwable) {
+                                Toast.makeText(requireContext(), "${e.message}", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+
+                        })
+                }, { throwable ->
+                    Toast.makeText(requireContext(), "${throwable.message}", Toast.LENGTH_SHORT)
+                        .show()
+                })
+        )
+    }
+
+    private fun writeOrderToFirebase(order: Order) {
+        FirebaseDatabase.getInstance()
+            .getReference(Common.ORDER_REF)
+            .child(Common.createOrderNumber())
+            .setValue(order)
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "${it.message}", Toast.LENGTH_SHORT).show()
+            }.addOnCompleteListener {task->
+                if (task.isSuccessful){
+                    cartDataSource.cleanCart(Common.currentUser!!.uid)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(object : SingleObserver<Int> {
+                            override fun onSubscribe(d: Disposable) {
+                            }
+
+                            override fun onSuccess(t: Int) {
+                                Toast.makeText(requireContext(), "Order Placed Successfully", Toast.LENGTH_SHORT).show()
+
+                            }
+
+                            override fun onError(e: Throwable) {
+                                Toast.makeText(requireContext(), "${e.message}", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+
+                        })
+                }
+            }
+
+    }
+
     private fun getAddressFromLatLng(latitude: Double, longitude: Double): String {
         val geoCoder = Geocoder(context, Locale.getDefault())
-        var result:String?=null
+        var result: String? = null
         try {
-            val addressList = geoCoder.getFromLocation(latitude,longitude,1)
-            if (addressList !=null && addressList.size >0){
+            val addressList = geoCoder.getFromLocation(latitude, longitude, 1)
+            if (addressList != null && addressList.size > 0) {
                 val address = addressList[0]
                 val sb = StringBuilder(address.getAddressLine(0))
                 result = sb.toString()
-            }else{
+            } else {
                 result = "Address not found!"
             }
             return result
-        }catch (e:IOException){
+        } catch (e: IOException) {
             return e.message!!
         }
     }
@@ -278,7 +376,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
         }
         cartViewModel.onStop()
         compositeDisposable.clear()
-        if (fusedLocationProviderClient !=null)
+        if (fusedLocationProviderClient != null)
             fusedLocationProviderClient.removeLocationUpdates(locationCallback)
         super.onStop()
     }
@@ -297,9 +395,11 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
         super.onResume()
         EventBus.getDefault().postSticky(HideFabCart(true))
         calculateTotalPrice()
-        if (fusedLocationProviderClient !=null)
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest,locationCallback,
-                Looper.getMainLooper())
+        if (fusedLocationProviderClient != null)
+            fusedLocationProviderClient.requestLocationUpdates(
+                locationRequest, locationCallback,
+                Looper.getMainLooper()
+            )
 
     }
 
@@ -347,12 +447,12 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                 }
 
                 override fun onError(e: Throwable) {
-                    if (e.message!!.contains("empty"))
-                    {
+                    if (e.message!!.contains("empty")) {
 
-                    }else{
+                    } else {
                         Toast.makeText(requireContext(), "${e.message}", Toast.LENGTH_SHORT).show()
-                    }                }
+                    }
+                }
 
             })
     }
@@ -389,13 +489,14 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
         menu.findItem(R.id.action_settings).setVisible(false)
         super.onPrepareOptionsMenu(menu)
     }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.cart_menu,menu)
+        inflater.inflate(R.menu.cart_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_clear_cart){
+        if (item.itemId == R.id.action_clear_cart) {
 
             cartDataSource.cleanCart(Common.currentUser!!.uid)
                 .subscribeOn(Schedulers.io())

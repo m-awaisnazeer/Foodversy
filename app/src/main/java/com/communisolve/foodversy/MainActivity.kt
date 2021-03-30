@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(
             AuthUI.getInstance()
                 .createSignInIntentBuilder()
+                .setTheme(R.style.LogInTheme)
                 //.setAuthMethodPickerLayout(authMethodPickerLayout)
                 .setAvailableProviders(providers!!)
                 .setIsSmartLockEnabled(false)
