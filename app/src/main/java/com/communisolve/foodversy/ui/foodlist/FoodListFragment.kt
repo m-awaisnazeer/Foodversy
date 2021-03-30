@@ -34,7 +34,7 @@ class FoodListFragment : Fragment() {
                 AnimationUtils.loadLayoutAnimation(context, R.anim.layout_item_from_left)
         }
 
-        (activity as AppCompatActivity).supportActionBar!!.title = Common.categorySelected.name
+        (activity as AppCompatActivity).supportActionBar!!.title = Common.categorySelected!!.name
 
         viewModel.getMutavleFoodliveData().observe(viewLifecycleOwner, Observer {
             adapter = MyFoodListAdapter(requireContext(), it)

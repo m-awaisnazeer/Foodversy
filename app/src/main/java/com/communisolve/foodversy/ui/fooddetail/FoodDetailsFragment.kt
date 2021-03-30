@@ -84,7 +84,7 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
         compositeDisposable = CompositeDisposable()
         cartDataSource = LocalCartDataSource(CartDatabase.getInstance(requireContext()).CartDao())
 
-        (activity as AppCompatActivity).supportActionBar!!.title = Common.foodSelected.name
+        (activity as AppCompatActivity).supportActionBar!!.title = Common.foodSelected!!.name
         initView(root)
 
         viewModel.getMutableLiveDataFood().observe(viewLifecycleOwner, Observer {
@@ -99,7 +99,7 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
                     val radioButton = RadioButton(context)
                     radioButton.setOnCheckedChangeListener { buttonView, isChecked ->
                         if (isChecked)
-                            Common.foodSelected.userSelectedSize = sizeModel
+                            Common.foodSelected!!.userSelectedSize = sizeModel
                         calculateTotalPrice()
                     }
 
@@ -130,18 +130,18 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
     }
 
     private fun calculateTotalPrice() {
-        var totalPrice = Common.foodSelected.price.toDouble()
+        var totalPrice = Common.foodSelected!!.price.toDouble()
         var displayPrice = 0.0
 
         //Addon
 
-        if (Common.foodSelected.userSelectedAddon != null && Common.foodSelected.userSelectedAddon!!.size > 0) {
-            for (addOnModel in Common.foodSelected.userSelectedAddon!!)
+        if (Common.foodSelected!!.userSelectedAddon != null && Common.foodSelected!!.userSelectedAddon!!.size > 0) {
+            for (addOnModel in Common.foodSelected!!.userSelectedAddon!!)
                 totalPrice += addOnModel.price.toDouble()
         }
 
         //size
-        totalPrice += Common.foodSelected.userSelectedSize!!.price.toDouble()
+        totalPrice += Common.foodSelected!!.userSelectedSize!!.price.toDouble()
 
         displayPrice = totalPrice * number_button.number.toInt()
         displayPrice = Math.round(displayPrice * 100.0) / 100.0
@@ -181,7 +181,7 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
 
         //Event
         img_add_addon.setOnClickListener {
-            if (Common.foodSelected.addon != null) {
+            if (Common.foodSelected!!.addon != null) {
                 displayAllAddOn()
                 addOnBottomSheetDialog.show()
             }
@@ -203,30 +203,30 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
             val cartItem: CartItem = CartItem()
 
             cartItem.apply {
-                this.foodId = Common.foodSelected.id
-                this.foodName = Common.foodSelected.name
-                this.foodImage = Common.foodSelected.image
-                this.foodPrice = Common.foodSelected.price.toDouble()
+                this.foodId = Common.foodSelected!!.id
+                this.foodName = Common.foodSelected!!.name
+                this.foodImage = Common.foodSelected!!.image
+                this.foodPrice = Common.foodSelected!!.price.toDouble()
                 this.foodQuantity = number_button.number.toInt()
 
-                if (Common.foodSelected.userSelectedAddon != null) {
+                if (Common.foodSelected!!.userSelectedAddon != null) {
                     this.foodAddon = Gson().toJson(
-                        Common.foodSelected.userSelectedAddon
+                        Common.foodSelected!!.userSelectedAddon
                     )
                 } else
                     this.foodAddon = "Default"
 
-                if (Common.foodSelected.userSelectedSize != null) {
+                if (Common.foodSelected!!.userSelectedSize != null) {
                     this.foodSize = Gson().toJson(
-                        Common.foodSelected.userSelectedSize
+                        Common.foodSelected!!.userSelectedSize
                     )
                 } else
                     this.foodSize = "Default"
 
                 this.userPhone = Common.currentUser!!.phone
                 this.foodExtraPrice = Common.calculateExtraPrice(
-                    Common.foodSelected.userSelectedSize,
-                    Common.foodSelected.userSelectedAddon
+                    Common.foodSelected!!.userSelectedSize,
+                    Common.foodSelected!!.userSelectedAddon
                 )
                 this.uid = Common.currentUser!!.uid
             }
@@ -281,9 +281,7 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
                                     }
 
                                 })
-                        }
-                        else
-                        {
+                        } else {
                             //if item not aviable in database , just insert
                             compositeDisposable.add(
                                 cartDataSource.insertOrReplaceAll(cartItem)
@@ -339,21 +337,21 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
     }
 
     private fun displayAllAddOn() {
-        if (Common.foodSelected.addon!!.size > 0) {
+        if (Common.foodSelected!!.addon!!.size > 0) {
             chip_group_addon!!.clearCheck()
             chip_group_addon!!.removeAllViews()
 
             edt_search_addOn!!.addTextChangedListener(this)
 
-            for (addOnModel in Common.foodSelected.addon!!) {
+            for (addOnModel in Common.foodSelected!!.addon!!) {
                 val chip = layoutInflater.inflate(R.layout.layout_chip, null, false) as Chip
                 chip.text = StringBuilder(addOnModel.name).append("(+$").append(addOnModel.price)
                     .append(")").toString()
                 chip.setOnCheckedChangeListener { buttonView, isChecked ->
                     if (isChecked) {
-                        if (Common.foodSelected.userSelectedAddon == null)
-                            Common.foodSelected.userSelectedAddon = ArrayList()
-                        Common.foodSelected.userSelectedAddon!!.add(addOnModel)
+                        if (Common.foodSelected!!.userSelectedAddon == null)
+                            Common.foodSelected!!.userSelectedAddon = ArrayList()
+                        Common.foodSelected!!.userSelectedAddon!!.add(addOnModel)
                     }
                 }
                 chip_group_addon!!.addView(chip)
@@ -364,10 +362,10 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
     }
 
     private fun displayUserSelectedAddon() {
-        if (Common.foodSelected.userSelectedAddon != null && Common.foodSelected.userSelectedAddon!!.size > 0) {
+        if (Common.foodSelected!!.userSelectedAddon != null && Common.foodSelected!!.userSelectedAddon!!.size > 0) {
             chip_group_user_selected_addon.removeAllViews()
 
-            for (addonModel in Common.foodSelected.userSelectedAddon!!) {
+            for (addonModel in Common.foodSelected!!.userSelectedAddon!!) {
                 val chip =
                     layoutInflater.inflate(R.layout.layout_chip_with_delete, null, false) as Chip
                 chip.text = StringBuilder(addonModel.name).append("(+$").append(addonModel.price)
@@ -375,12 +373,12 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
                 chip.isClickable = false
                 chip.setOnCloseIconClickListener { view ->
                     chip_group_user_selected_addon.removeView(view)
-                    Common.foodSelected.userSelectedAddon!!.remove(addonModel)
+                    Common.foodSelected!!.userSelectedAddon!!.remove(addonModel)
                     calculateTotalPrice()
                 }
                 chip_group_user_selected_addon.addView(chip)
             }
-        } else if (Common.foodSelected.userSelectedAddon!!.size == 0) {
+        } else if (Common.foodSelected!!.userSelectedAddon!!.size == 0) {
             chip_group_user_selected_addon.removeAllViews()
         }
     }
@@ -389,7 +387,7 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
         waitingDialog!!.show()
 
         FirebaseDatabase.getInstance().getReference(Common.COMMENT_REF)
-            .child(Common.foodSelected.id)
+            .child(Common.foodSelected!!.id)
             .push().setValue(commentModel)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -408,14 +406,14 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
 
         FirebaseDatabase.getInstance()
             .getReference(Common.CATEGORY_REF)  // select category
-            .child(Common.categorySelected.menu_id) // selected menu in category
+            .child(Common.categorySelected!!.menu_id) // selected menu in category
             .child("foods") // selected foods array
-            .child(Common.foodSelected.key) // select key
+            .child(Common.foodSelected!!.key) // select key
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
                         val foodModel = snapshot.getValue(FoodModel::class.java)
-                        foodModel!!.key = Common.foodSelected.key
+                        foodModel!!.key = Common.foodSelected!!.key
                         //Apply Rating
 
                         val sumRating = foodModel.ratingValue + ratingValue
@@ -513,16 +511,16 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
         chip_group_addon!!.clearCheck()
         chip_group_addon!!.removeAllViews()
 
-        for (addOnModel in Common.foodSelected.addon!!) {
+        for (addOnModel in Common.foodSelected!!.addon!!) {
             if (addOnModel!!.name.toLowerCase().contains(charSequence.toString().toLowerCase())) {
                 val chip = layoutInflater.inflate(R.layout.layout_chip, null, false) as Chip
                 chip.text = StringBuilder(addOnModel.name).append("(+$").append(addOnModel.price)
                     .append(")").toString()
                 chip.setOnCheckedChangeListener { buttonView, isChecked ->
                     if (isChecked) {
-                        if (Common.foodSelected.userSelectedAddon == null)
-                            Common.foodSelected.userSelectedAddon = ArrayList()
-                        Common.foodSelected.userSelectedAddon!!.add(addOnModel)
+                        if (Common.foodSelected!!.userSelectedAddon == null)
+                            Common.foodSelected!!.userSelectedAddon = ArrayList()
+                        Common.foodSelected!!.userSelectedAddon!!.add(addOnModel)
                     }
                 }
                 chip_group_addon!!.addView(chip)

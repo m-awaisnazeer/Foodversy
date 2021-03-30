@@ -12,7 +12,7 @@ class FoodListViewModel : ViewModel() {
     fun getMutavleFoodliveData(): MutableLiveData<List<FoodModel>> {
         if (mutablefoodListData == null) {
             mutablefoodListData = MutableLiveData()
-            mutablefoodListData!!.value = Common.categorySelected.foods
+            mutablefoodListData!!.value = Common.categorySelected!!.foods
 
         }
         return mutablefoodListData!!

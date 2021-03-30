@@ -38,8 +38,8 @@ object Common {
     }
 
     val COMMENT_REF: String = "Comments"
-    lateinit var foodSelected: FoodModel
-    lateinit var categorySelected: CategoryModel
+     var foodSelected: FoodModel?=null
+     var categorySelected: CategoryModel?=null
     val CATEGORY_REF: String = "Category"
     val FULL_WIDTH_COLUMN: Int = 1
     val DEFAULT_COLUMN_COUNT: Int = 0

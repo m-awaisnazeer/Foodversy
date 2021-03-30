@@ -49,7 +49,7 @@ class MyCategoriesAdapter(
 
         holder.itemView.setOnClickListener {
             Common.categorySelected = CategoriesList.get(position)
-            Log.d("MTAG", "onBindViewHolder:${Common.categorySelected.menu_id} ")
+            Log.d("MTAG", "onBindViewHolder:${Common.categorySelected!!.menu_id} ")
             EventBus.getDefault().postSticky(CategoryClick(true,CategoriesList.get(position)))
         }
 

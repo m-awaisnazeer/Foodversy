@@ -1,8 +1,9 @@
 package com.communisolve.foodversy
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
-import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -23,6 +24,7 @@ import com.communisolve.foodversy.database.CartDataSource
 import com.communisolve.foodversy.database.CartDatabase
 import com.communisolve.foodversy.database.LocalCartDataSource
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -37,6 +39,7 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var cartDataSource: CartDataSource
     private lateinit var fab: CounterFab
     private lateinit var navController: NavController
+    private lateinit var drawerLayout: DrawerLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +51,7 @@ class HomeActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
 
-        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
+        drawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
         navController = findNavController(R.id.nav_host_fragment)
         // Passing each menu ID as a set of Ids because each
@@ -62,10 +65,24 @@ class HomeActivity : AppCompatActivity() {
         fab.setOnClickListener { view ->
             navController.navigate(R.id.nav_cart)
         }
+
+        val headerView = navView.getHeaderView(0)
+        var txt_user = headerView.findViewById<TextView>(R.id.txt_user)
+        txt_user.setText("Welcome, ${Common.currentUser!!.name}")
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
         counterCartItem()
+
+        navView.menu.findItem(R.id.nav_signout).setOnMenuItemClickListener {
+            FirebaseAuth.getInstance().signOut()
+            Common.foodSelected = null
+            Common.categorySelected = null
+            Common.currentUser = null
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return@setOnMenuItemClickListener true
+        }
     }
 
     override fun onResume() {
@@ -121,11 +138,10 @@ class HomeActivity : AppCompatActivity() {
     fun onCartFabHide(event: HideFabCart) {
         if (event.isHide) {
             fab.hide()
-        }else{
+        } else {
             fab.show()
         }
     }
-
 
 
     private fun counterCartItem() {
@@ -144,7 +160,7 @@ class HomeActivity : AppCompatActivity() {
 
                 override fun onError(e: Throwable) {
                     if (e.message!!.contains("empty")) {
-                       // Toast.makeText(this@HomeActivity, "Empty Cart", Toast.LENGTH_SHORT).show()
+                        // Toast.makeText(this@HomeActivity, "Empty Cart", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(this@HomeActivity, "${e.message}", Toast.LENGTH_SHORT).show()
 
