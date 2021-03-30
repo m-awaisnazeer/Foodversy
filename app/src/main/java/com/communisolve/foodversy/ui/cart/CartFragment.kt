@@ -1,8 +1,11 @@
 package com.communisolve.foodversy.ui.cart
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.graphics.Color
+import android.location.Location
 import android.os.Bundle
+import android.os.Looper
 import android.os.Parcelable
 import android.view.*
 import android.widget.EditText
@@ -29,6 +32,7 @@ import com.communisolve.foodversy.database.CartDataSource
 import com.communisolve.foodversy.database.CartDatabase
 import com.communisolve.foodversy.database.CartItem
 import com.communisolve.foodversy.database.LocalCartDataSource
+import com.google.android.gms.location.*
 import com.google.android.material.button.MaterialButton
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -52,6 +56,12 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
     private val cartViewModel: CartViewModel by viewModels()
 
 
+    private lateinit var locationRequest:LocationRequest
+    private lateinit var locationCallback: LocationCallback
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var currentLocation:Location
+
+
     //Database
     private lateinit var compositeDisposable: CompositeDisposable
     private lateinit var cartDataSource: CartDataSource
@@ -66,6 +76,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
         cartDataSource = LocalCartDataSource(CartDatabase.getInstance(requireContext()).CartDao())
 
         initViews(root)
+        initLocation()
         cartViewModel.initCartDatabase(requireContext())
         calculateTotalPrice()
         EventBus.getDefault().postSticky(HideFabCart(true))
@@ -85,6 +96,33 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
         return root
     }
 
+    @SuppressLint("MissingPermission")
+    private fun initLocation() {
+        buildLocationRequest()
+        buildLocationCallback()
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest,locationCallback, Looper.getMainLooper())
+    }
+
+    private fun buildLocationCallback() {
+        locationCallback = object :LocationCallback(){
+            override fun onLocationResult(locationResult: LocationResult) {
+                super.onLocationResult(locationResult)
+                currentLocation = locationResult.lastLocation
+            }
+        }
+    }
+
+    private fun buildLocationRequest() {
+        locationRequest = LocationRequest()
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+        locationRequest.setInterval(5000)
+        locationRequest.setFastestInterval(3000)
+        locationRequest.setSmallestDisplacement(10f)
+
+    }
+
+    @SuppressLint("MissingPermission")
     private fun initViews(root: View?) {
         setHasOptionsMenu(true) //if we not add it, menu will never be inflace
         txt_empty_cart = root!!.findViewById(R.id.txt_empty_cart)
@@ -109,6 +147,9 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
 
             val view = LayoutInflater.from(requireContext()).inflate(R.layout.layout_place_order,null)
             val edt_address = view.findViewById(R.id.edt_address) as EditText
+            val edt_comment = view.findViewById(R.id.edt_comment) as EditText
+            //val txt_address = view.findViewById<TextView>(R.id.txt_address_detail)
+            val txt_address_detail = view.findViewById<TextView>(R.id.txt_address_detail)
             val rdi_home_address = view.findViewById(R.id.rdi_home_address) as RadioButton
             val rdi_other_address = view.findViewById(R.id.rdi_other_address) as RadioButton
             val rdi_ship_this_address = view.findViewById(R.id.rdi_ship_this_address) as RadioButton
@@ -120,6 +161,8 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
             rdi_home_address.setOnCheckedChangeListener { buttonView, isChecked ->
                 if (isChecked){
                     edt_address.setText("${Common.currentUser!!.address}")
+                    txt_address_detail.visibility = View.GONE
+
                 }
             }
 
@@ -127,24 +170,36 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                 if (isChecked){
                     edt_address.setText("")
                     //edt_address.setHint("Enter Your Address")
+                    txt_address_detail.visibility = View.GONE
+
                 }
             }
 
             rdi_ship_this_address.setOnCheckedChangeListener { buttonView, isChecked ->
                 if (isChecked){
-                    Toast.makeText(
-                        requireContext(),
-                        "Implement late with Google API",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    fusedLocationProviderClient.lastLocation
+                        .addOnCompleteListener { task->
+                            val cooridate = StringBuilder()
+                                .append(task.result!!.latitude)
+                                .append("/")
+                                .append(task.result.longitude)
+                                .toString()
+
+                            edt_address.setText(cooridate)
+                            txt_address_detail.visibility = View.VISIBLE
+                            txt_address_detail.setText("Implement late with Google API")
+                        }.addOnFailureListener { e->
+                            txt_address_detail.visibility = View.GONE
+                            Toast.makeText(requireContext(), "${e.message}", Toast.LENGTH_SHORT).show()
+                        }
                 }
             }
 
             builder.setView(view)
             builder.setNegativeButton("NO",{dialog,_-> dialog.dismiss()})
-            builder.setPositiveButton("YES", { dialog, _ ->
+            builder.setPositiveButton("YES") { dialog, _ ->
                 Toast.makeText(requireContext(), "Implement Late", Toast.LENGTH_SHORT).show()
-            })
+            }
 
             val dialog = builder.create()
             dialog.show()
@@ -183,6 +238,8 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
         }
         cartViewModel.onStop()
         compositeDisposable.clear()
+        if (fusedLocationProviderClient !=null)
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback)
         super.onStop()
     }
 
@@ -195,10 +252,14 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
 
     }
 
+    @SuppressLint("MissingPermission")
     override fun onResume() {
         super.onResume()
         EventBus.getDefault().postSticky(HideFabCart(true))
         calculateTotalPrice()
+        if (fusedLocationProviderClient !=null)
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest,locationCallback,
+                Looper.getMainLooper())
 
     }
 

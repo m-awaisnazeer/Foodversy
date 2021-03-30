@@ -30,4 +30,5 @@
     <string name="enter_your_address">Enter Your address</string>
     <string name="cash_on_delivery">Cash On Delivery</string>
     <string name="online_payment">Online Payment</string>
+    <string name="enter_comment">Enter Comment</string>
 </resources>

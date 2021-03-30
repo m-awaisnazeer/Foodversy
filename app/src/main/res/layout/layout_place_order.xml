@@ -18,6 +18,27 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
+        android:id="@+id/txt_address_detail"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:text="Delivery Method"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/edt_comment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/enter_comment" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Delivery Method"
@@ -45,7 +66,6 @@
             android:id="@+id/rdi_other_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:checked="true"
             android:text="Other Address"
             android:textColor="@color/dialog_text_color"
             android:textSize="18sp"
@@ -55,7 +75,6 @@
             android:id="@+id/rdi_ship_this_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:checked="true"
             android:text="Ship to this Address"
             android:textColor="@color/dialog_text_color"
             android:textSize="18sp"
