@@ -93,7 +93,7 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
                 txt_food_description.setText(this.description)
                 txt_food_price.setText(this.price.toString())
                 txt_food_name.setText(this.name)
-                ratingBar.rating = this.ratingValue.toFloat()
+                ratingBar.rating = this.ratingValue.toFloat()/it.ratingCount
 
                 for (sizeModel in it.size) {
                     val radioButton = RadioButton(context)
@@ -418,15 +418,14 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
 
                         val sumRating = foodModel.ratingValue + ratingValue
                         val ratingCount = foodModel.ratingCount + 1
-                        val result = sumRating / ratingCount
 
                         val updateData = HashMap<String, Any>()
-                        updateData["ratingValue"] = result
+                        updateData["ratingValue"] = sumRating
                         updateData["ratingCount"] = ratingCount
 
                         //update data in variable
                         foodModel.ratingCount = ratingCount
-                        foodModel.ratingValue = result
+                        foodModel.ratingValue = sumRating
 
                         snapshot.ref
                             .updateChildren(updateData)

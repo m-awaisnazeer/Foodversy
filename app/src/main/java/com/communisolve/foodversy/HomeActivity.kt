@@ -161,6 +161,7 @@ class HomeActivity : AppCompatActivity() {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (snapshot.exists()) {
                             Common.categorySelected = snapshot.getValue(CategoryModel::class.java)
+                            Common.categorySelected!!.menu_id = snapshot.key!!
                             //load food
                             FirebaseDatabase.getInstance().getReference(Common.CATEGORY_REF)
                                 .child(event.popularCategoryModel.menu_id)
@@ -173,6 +174,8 @@ class HomeActivity : AppCompatActivity() {
                                         if (snapshot.exists()) {
                                             for (foodSnapshot in snapshot.children){
                                                 Common.foodSelected = foodSnapshot.getValue(FoodModel::class.java)
+                                                Common.foodSelected!!.key = foodSnapshot.key!!
+
                                             }
                                             navController.navigate(R.id.nav_foodDetailsFragment)
                                             dialog!!.dismiss()
@@ -230,6 +233,8 @@ class HomeActivity : AppCompatActivity() {
                         if (snapshot.exists()) {
                             dialog!!.dismiss()
                             Common.categorySelected = snapshot.getValue(CategoryModel::class.java)
+                            Common.categorySelected!!.menu_id = snapshot.key!!
+
                             //load food
                             FirebaseDatabase.getInstance().getReference(Common.CATEGORY_REF)
                                 .child(event.bestDealsModel!!.menu_id)
@@ -242,6 +247,7 @@ class HomeActivity : AppCompatActivity() {
                                         if (snapshot.exists()) {
                                             for (foodSnapshot in snapshot.children){
                                                 Common.foodSelected = foodSnapshot.getValue(FoodModel::class.java)
+                                                Common.foodSelected!!.key = foodSnapshot.key!!
                                             }
                                             navController.navigate(R.id.nav_foodDetailsFragment)
                                             dialog!!.dismiss()
