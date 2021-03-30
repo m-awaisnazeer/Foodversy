@@ -1,5 +1,6 @@
 package com.communisolve.foodversy
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -15,16 +16,20 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.andremion.counterfab.CounterFab
-import com.communisolve.foodversy.EventBus.CategoryClick
-import com.communisolve.foodversy.EventBus.CounterCartEvent
-import com.communisolve.foodversy.EventBus.FoodItemClick
-import com.communisolve.foodversy.EventBus.HideFabCart
+import com.communisolve.foodversy.EventBus.*
 import com.communisolve.foodversy.common.Common
 import com.communisolve.foodversy.database.CartDataSource
 import com.communisolve.foodversy.database.CartDatabase
 import com.communisolve.foodversy.database.LocalCartDataSource
+import com.communisolve.foodversy.model.CategoryModel
+import com.communisolve.foodversy.model.FoodModel
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import dmax.dialog.SpotsDialog
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -40,10 +45,13 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var fab: CounterFab
     private lateinit var navController: NavController
     private lateinit var drawerLayout: DrawerLayout
+    private var dialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+        dialog = SpotsDialog.Builder().setCancelable(false).setContext(this).build()
+
         fab = findViewById(R.id.counter_fab)
         cartDataSource = LocalCartDataSource(CartDatabase.getInstance(this).CartDao())
         counterCartItem()
@@ -140,6 +148,144 @@ class HomeActivity : AppCompatActivity() {
             fab.hide()
         } else {
             fab.show()
+        }
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onPopularFoodItemClick(event: PopularFoodItemClick) {
+        if (event.popularCategoryModel != null) {
+            dialog!!.show()
+            FirebaseDatabase.getInstance()
+                .getReference(Common.CATEGORY_REF).child(event.popularCategoryModel.menu_id)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            Common.categorySelected = snapshot.getValue(CategoryModel::class.java)
+                            //load food
+                            FirebaseDatabase.getInstance().getReference(Common.CATEGORY_REF)
+                                .child(event.popularCategoryModel.menu_id)
+                                .child("foods")
+                                .orderByChild("id")
+                                .equalTo(event.popularCategoryModel.food_id)
+                                .limitToLast(1)
+                                .addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        if (snapshot.exists()) {
+                                            for (foodSnapshot in snapshot.children){
+                                                Common.foodSelected = foodSnapshot.getValue(FoodModel::class.java)
+                                            }
+                                            navController.navigate(R.id.nav_foodDetailsFragment)
+                                            dialog!!.dismiss()
+                                        } else {
+                                            dialog!!.dismiss()
+                                            Toast.makeText(
+                                                this@HomeActivity,
+                                                "Item doesn't exists",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                        dialog!!.dismiss()
+                                        Toast.makeText(
+                                            this@HomeActivity,
+                                            "${error.message}",
+                                            Toast.LENGTH_SHORT
+                                        )
+                                            .show()
+                                    }
+
+                                })
+                        } else {
+                            dialog!!.dismiss()
+                            Toast.makeText(
+                                this@HomeActivity,
+                                "Item doesn't exists",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        dialog!!.dismiss()
+                        Toast.makeText(this@HomeActivity, "${error.message}", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                })
+        } else {
+
+        }
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onBestDealsItemClick(event: BestDealsItemClick) {
+        if (event.bestDealsModel != null) {
+            dialog!!.show()
+            FirebaseDatabase.getInstance()
+                .getReference(Common.CATEGORY_REF).child(event.bestDealsModel!!.menu_id)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            dialog!!.dismiss()
+                            Common.categorySelected = snapshot.getValue(CategoryModel::class.java)
+                            //load food
+                            FirebaseDatabase.getInstance().getReference(Common.CATEGORY_REF)
+                                .child(event.bestDealsModel!!.menu_id)
+                                .child("foods")
+                                .orderByChild("id")
+                                .equalTo(event.bestDealsModel!!.food_id)
+                                .limitToLast(1)
+                                .addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        if (snapshot.exists()) {
+                                            for (foodSnapshot in snapshot.children){
+                                                Common.foodSelected = foodSnapshot.getValue(FoodModel::class.java)
+                                            }
+                                            navController.navigate(R.id.nav_foodDetailsFragment)
+                                            dialog!!.dismiss()
+
+                                        } else {
+                                            dialog!!.dismiss()
+                                            Toast.makeText(
+                                                this@HomeActivity,
+                                                "Item doesn't exists",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                        dialog!!.dismiss()
+                                        Toast.makeText(
+                                            this@HomeActivity,
+                                            "${error.message}",
+                                            Toast.LENGTH_SHORT
+                                        )
+                                            .show()
+                                    }
+
+                                })
+                        } else {
+                            dialog!!.dismiss()
+                            Toast.makeText(
+                                this@HomeActivity,
+                                "Item doesn't exists",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        dialog!!.dismiss()
+                        Toast.makeText(this@HomeActivity, "${error.message}", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                })
+        } else {
+
         }
     }
 
