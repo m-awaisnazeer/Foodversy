@@ -578,8 +578,11 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe({ listcartItems ->
                                         //after having all cat items we will submit payment
+                                        val headers = HashMap<String,String>()
+                                        headers.put("Authorization",Common.buildToken(Common.authorizeToken))
+
                                         compositeDisposable.add(
-                                            apiService.submitAPIPayment(totalPrice, nonce!!.nonce)
+                                            apiService.submitAPIPayment(headers,totalPrice, nonce!!.nonce)
                                                 .subscribeOn(Schedulers.io())
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribe({ brainTreeTransaction ->

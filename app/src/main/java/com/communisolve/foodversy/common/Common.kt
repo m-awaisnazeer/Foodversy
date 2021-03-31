@@ -68,7 +68,12 @@ object Common {
         }
     }
 
-     var currentToken: String=""
+    fun buildToken(authorizeToken: String?): String {
+        return StringBuilder("bearer").append(" ").append(authorizeToken).toString()
+    }
+
+    var authorizeToken: String?=null
+    var currentToken: String=""
     val ORDER_REF: String="Orders"
     val COMMENT_REF: String = "Comments"
      var foodSelected: FoodModel?=null

@@ -30,6 +30,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.util.*
+import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity() {
 
@@ -150,26 +151,37 @@ class MainActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
 
-                        compositDisposable.add(
-                            apiService.getToken()
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe({ braintree ->
-                                    dialog.dismiss()
-                                    /*
-                                     val userModel = snapshot.getValue(UserModel::class.java)
-                        gotoHomeActivity(userModel)
-                                     */
+                        FirebaseAuth.getInstance()
+                            .currentUser!!.getIdToken(true)
+                            .addOnCompleteListener { task->
+                                Common.authorizeToken = task.result!!.token
+                                val headers = HashMap<String,String>()
+                                headers.put("Authorization",Common.buildToken(Common.authorizeToken))
 
-                                }, {
-                                    Toast.makeText(
-                                        this@MainActivity,
-                                        "${it.message}",
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
-                                })
-                        )
+                                compositDisposable.add(
+                                    apiService.getToken(headers)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe({ braintree ->
+                                            dialog.dismiss()
+                                            /*
+                                             val userModel = snapshot.getValue(UserModel::class.java)
+                                gotoHomeActivity(userModel)
+                                             */
+
+                                        }, {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "${it.message}",
+                                                Toast.LENGTH_SHORT
+                                            )
+                                                .show()
+                                        })
+                                )
+
+                            }.addOnFailureListener {
+
+                            }
                         dialog.dismiss()
                         val userModel = snapshot.getValue(UserModel::class.java)
                         gotoHomeActivity(userModel,"")
@@ -224,27 +236,37 @@ class MainActivity : AppCompatActivity() {
                 .setValue(userModel)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        compositDisposable.add(
-                            apiService.getToken()
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe({ braintree ->
-                                    dialog.dismiss()
-                                    /*
-                                    dialog.dismiss()
-                        Toast.makeText(this, "Registeration Success", Toast.LENGTH_SHORT).show()
-                        gotoHomeActivity(userModel, "")
-                                     */
 
-                                }, {
-                                    Toast.makeText(
-                                        this@MainActivity,
-                                        "${it.message}",
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
-                                })
-                        )
+                        FirebaseAuth.getInstance().currentUser!!
+                            .getIdToken(true)
+                            .addOnCompleteListener {
+                                Common.authorizeToken = it.result.token
+
+                                val headers = HashMap<String,String>()
+                                headers.put("Authorization",Common.buildToken(Common.authorizeToken))
+                                compositDisposable.add(
+                                    apiService.getToken(headers)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe({ braintree ->
+                                            dialog.dismiss()
+                                            /*
+                                            dialog.dismiss()
+                                Toast.makeText(this, "Registeration Success", Toast.LENGTH_SHORT).show()
+                                gotoHomeActivity(userModel, "")
+                                             */
+
+                                        }, {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "${it.message}",
+                                                Toast.LENGTH_SHORT
+                                            )
+                                                .show()
+                                        }))
+                            }.addOnFailureListener {
+                                Toast.makeText(this, "${it.message}", Toast.LENGTH_SHORT).show()
+                            }
                         dialog.dismiss()
                         Toast.makeText(this, "Registeration Success", Toast.LENGTH_SHORT).show()
                         gotoHomeActivity(userModel, "")
