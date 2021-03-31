@@ -32,4 +32,9 @@
         android:name="com.communisolve.foodversy.ui.fooddetail.FoodDetailsFragment"
         android:label="@string/food_details_fragment"
         tools:layout="@layout/food_details_fragment" />
+    <fragment
+        android:id="@+id/nav_viewOrderFragment"
+        android:name="com.communisolve.foodversy.ui.view_orders.ViewOrderFragment"
+        android:label="@string/fragment_view_order"
+        tools:layout="@layout/fragment_view_order" />
 </navigation>

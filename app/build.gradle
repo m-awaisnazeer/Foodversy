@@ -100,4 +100,5 @@ dependencies {
 
     implementation 'com.karumi:dexter:6.1.0'
 
+    implementation 'com.braintreepayments.api:drop-in:4.1.1'
 }

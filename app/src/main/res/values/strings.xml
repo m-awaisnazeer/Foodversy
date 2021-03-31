@@ -31,4 +31,7 @@
     <string name="cash_on_delivery">Cash On Delivery</string>
     <string name="online_payment">Online Payment</string>
     <string name="enter_comment">Enter Comment</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="fragment_view_order">Orders Placed</string>
 </resources>

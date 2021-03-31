@@ -116,6 +116,7 @@ class MainActivity : AppCompatActivity() {
             AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setTheme(R.style.LogInTheme)
+                .setLogo(R.drawable.foodversy_iconpng)
                 //.setAuthMethodPickerLayout(authMethodPickerLayout)
                 .setAvailableProviders(providers!!)
                 .setIsSmartLockEnabled(false)

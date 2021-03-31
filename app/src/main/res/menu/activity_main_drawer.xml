@@ -24,6 +24,14 @@
             android:icon="@drawable/ic_baseline_shopping_cart_24"
             android:title="@string/menu_cart" />
     </group>
+
+    <group android:id="@+id/orders_group">
+
+        <item
+            android:id="@+id/nav_viewOrderFragment"
+            android:icon="@drawable/ic_baseline_view_headline_24"
+            android:title="@string/fragment_view_order" />
+    </group>
     <group android:id="@+id/user_group">
 
         <item

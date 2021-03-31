@@ -45,6 +45,29 @@ object Common {
             .toString()
     }
 
+    fun getDateOfWeek(i: Int): String {
+        when(i){
+            1-> return "Monday"
+            2-> return "Tuesday"
+            3-> return "Wednesday"
+            4-> return "Thursday"
+            5-> return "Friday"
+            6-> return "Saturday"
+            7-> return "Sunday"
+            else -> return "Unk"
+        }
+    }
+
+    fun convertStatusToText(orderStatus: Int): String {
+        when(orderStatus){
+            0-> return "Placed"
+            1-> return "Shipping"
+            2-> return "Shipped"
+            -1 -> return "Cancelled"
+            else -> return "Unk"
+        }
+    }
+
     val ORDER_REF: String="Orders"
     val COMMENT_REF: String = "Comments"
      var foodSelected: FoodModel?=null
