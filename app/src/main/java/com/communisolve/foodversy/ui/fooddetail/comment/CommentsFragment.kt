@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.communisolve.foodversy.R
 import com.communisolve.foodversy.adapter.MyCommentsListAdapter
-import com.communisolve.foodversy.callbacks.ICommentCallbackListner
+import com.communisolve.foodversy.callbacks.ICOMMENTCALLBACKLISTNER
 import com.communisolve.foodversy.common.Common
 import com.communisolve.foodversy.model.CommentModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -23,15 +23,15 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import dmax.dialog.SpotsDialog
 
-class CommentsFragment : BottomSheetDialogFragment(), ICommentCallbackListner {
+class CommentsFragment : BottomSheetDialogFragment(), ICOMMENTCALLBACKLISTNER {
     private lateinit var recycler_comment: RecyclerView
     private val viewModel: CommentsViewModel by viewModels()
 
-    private var iCommentCallbackListner: ICommentCallbackListner
+    private var ICOMMENTCALLBACKLISTNER: ICOMMENTCALLBACKLISTNER
     private var dialog: AlertDialog? = null
 
     init {
-        iCommentCallbackListner = this
+        ICOMMENTCALLBACKLISTNER = this
     }
 
     override fun onCreateView(
@@ -63,11 +63,11 @@ class CommentsFragment : BottomSheetDialogFragment(), ICommentCallbackListner {
                         val commentModel = commentSnapshot.getValue(CommentModel::class.java)
                         commentModels.add(commentModel!!)
                     }
-                    iCommentCallbackListner.onCommentLoadSuccess(commentModels)
+                    ICOMMENTCALLBACKLISTNER.onCommentLoadSuccess(commentModels)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    iCommentCallbackListner.onCommentLoadFailed(error.message)
+                    ICOMMENTCALLBACKLISTNER.onCommentLoadFailed(error.message)
                 }
 
             })

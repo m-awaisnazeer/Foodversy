@@ -29,6 +29,7 @@ import com.communisolve.foodversy.EventBus.HideFabCart
 import com.communisolve.foodversy.EventBus.UpdateItemInCart
 import com.communisolve.foodversy.R
 import com.communisolve.foodversy.adapter.MyCartAdapter
+import com.communisolve.foodversy.callbacks.ILoadTimeFromFirebaseCallback
 import com.communisolve.foodversy.callbacks.IOnCartItemMenuClickListner
 import com.communisolve.foodversy.common.Common
 import com.communisolve.foodversy.database.CartDataSource
@@ -40,7 +41,10 @@ import com.communisolve.foodversy.remote.ApiService
 import com.communisolve.foodversy.remote.RetrofitCloudClient
 import com.google.android.gms.location.*
 import com.google.android.material.button.MaterialButton
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import io.reactivex.Single
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -52,9 +56,10 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.io.IOException
+import java.text.SimpleDateFormat
 import java.util.*
 
-class CartFragment : Fragment(), IOnCartItemMenuClickListner {
+class CartFragment : Fragment(), IOnCartItemMenuClickListner, ILoadTimeFromFirebaseCallback {
     companion object {
         val REQUEST_BRAINTREE_CODE = 8080
     }
@@ -79,6 +84,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
     internal lateinit var address: String
     internal lateinit var comment: String
     internal lateinit var apiService: ApiService
+    private lateinit var listener: ILoadTimeFromFirebaseCallback
 
     //Database
     private lateinit var compositeDisposable: CompositeDisposable
@@ -147,6 +153,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
 
     @SuppressLint("MissingPermission")
     private fun initViews(root: View?) {
+        listener = this
         apiService = RetrofitCloudClient.getInstance().create(ApiService::class.java)
         setHasOptionsMenu(true) //if we not add it, menu will never be inflace
         txt_empty_cart = root!!.findViewById(R.id.txt_empty_cart)
@@ -327,7 +334,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                                     )
 
                                     //submit to Firebase
-                                    writeOrderToFirebase(order)
+                                    syncLocalTimeWithServerTime(order)
                                 }
                             }
 
@@ -342,6 +349,25 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                         .show()
                 })
         )
+    }
+
+    private fun syncLocalTimeWithServerTime(order: Order) {
+        val offsetRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset")
+        offsetRef.addListenerForSingleValueEvent(object :ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val offset = snapshot.getValue(Long::class.java)
+                val estimatedTimeInMS = System.currentTimeMillis()+offset!!
+
+                val sdf = SimpleDateFormat("MM dd yyyy, HH:mm")
+                val date = Date(estimatedTimeInMS)
+                listener.onLoadTimeSuccess(order,estimatedTimeInMS)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
     }
 
     private fun writeOrderToFirebase(order: Order) {
@@ -578,17 +604,24 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe({ listcartItems ->
                                         //after having all cat items we will submit payment
-                                        val headers = HashMap<String,String>()
-                                        headers.put("Authorization",Common.buildToken(Common.authorizeToken))
+                                        val headers = HashMap<String, String>()
+                                        headers.put(
+                                            "Authorization",
+                                            Common.buildToken(Common.authorizeToken)
+                                        )
 
                                         compositeDisposable.add(
-                                            apiService.submitAPIPayment(headers,totalPrice, nonce!!.nonce)
+                                            apiService.submitAPIPayment(
+                                                headers,
+                                                totalPrice,
+                                                nonce!!.nonce
+                                            )
                                                 .subscribeOn(Schedulers.io())
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribe({ brainTreeTransaction ->
-                                                    if (brainTreeTransaction.success){
+                                                    if (brainTreeTransaction.success) {
                                                         //create Order
-                                                            val finalPrice = totalPrice
+                                                        val finalPrice = totalPrice
                                                         if (currentLocation != null) {
                                                             val order = Order(
                                                                 userId = Common.currentUser!!.uid,
@@ -607,7 +640,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                                                             )
 
                                                             //submit to Firebase
-                                                            writeOrderToFirebase(order)
+                                                            syncLocalTimeWithServerTime(order)
                                                         }
                                                     }
                                                 },
@@ -637,5 +670,14 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                     })
             }
         }
+    }
+
+    override fun onLoadTimeSuccess(order: Order, estimatedTimeMS: Long) {
+        order.createDate = estimatedTimeMS
+        writeOrderToFirebase(order)
+    }
+
+    override fun onLoadTimeFailed(message: String) {
+        Toast.makeText(requireContext(), "${message}", Toast.LENGTH_SHORT).show()
     }
 }
