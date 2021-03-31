@@ -674,6 +674,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner, ILoadTimeFromFireb
 
     override fun onLoadTimeSuccess(order: Order, estimatedTimeMS: Long) {
         order.createDate = estimatedTimeMS
+        order.orderStatus = 0
         writeOrderToFirebase(order)
     }
 

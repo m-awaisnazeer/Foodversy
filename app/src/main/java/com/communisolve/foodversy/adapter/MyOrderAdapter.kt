@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.communisolve.foodversy.common.Common
@@ -36,17 +37,19 @@ class MyOrderAdapter(var context: Context, var ordersList: List<Order>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         Glide.with(context).load(ordersList[position]!!.cartItemList!![0]!!.foodImage)
             .into(binding.imgOrder)
-        /*
+
         calender.timeInMillis = ordersList[position].createDate
         val date = Date(ordersList[position].createDate)
         binding.txtOrderDate.text = StringBuilder(Common.getDateOfWeek(calender.get(Calendar.DAY_OF_WEEK)))
             .append(" ")
             .append(simpleDateFormat.format(date))
-         */
+
+       // Toast.makeText(context, "${calender.get(Calendar.DAY_OF_WEEK)}", Toast.LENGTH_SHORT).show()
+
 
         binding.txtOrderNumber.text = StringBuilder("Order Number: ").append(ordersList[position].orderNumber)
         binding.txtOrderComment.text = StringBuilder("Comment: ").append(ordersList[position].comment)
-        binding.txtOrderStatus.text = StringBuilder("").append(Common.convertStatusToText(ordersList[position].orderStatus))
+        binding.txtOrderStatus.text = StringBuilder("Staus: ").append(Common.convertStatusToText(ordersList[position].orderStatus))
 
     }
 

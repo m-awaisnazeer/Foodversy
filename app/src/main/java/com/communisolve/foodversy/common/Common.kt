@@ -47,13 +47,13 @@ object Common {
 
     fun getDateOfWeek(i: Int): String {
         when(i){
-            1-> return "Monday"
-            2-> return "Tuesday"
-            3-> return "Wednesday"
-            4-> return "Thursday"
-            5-> return "Friday"
-            6-> return "Saturday"
-            7-> return "Sunday"
+            1-> return "Sunday"
+            2-> return "Monday"
+            3-> return "Tuesday"
+            4-> return "Wednesday"
+            5-> return "Thursday"
+            6-> return "Friday"
+            7-> return "Saturday"
             else -> return "Unk"
         }
     }
