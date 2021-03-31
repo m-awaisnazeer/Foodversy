@@ -68,6 +68,7 @@ object Common {
         }
     }
 
+     var currentToken: String=""
     val ORDER_REF: String="Orders"
     val COMMENT_REF: String = "Comments"
      var foodSelected: FoodModel?=null

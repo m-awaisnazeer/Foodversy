@@ -1,12 +1,15 @@
 package com.communisolve.foodversy.ui.cart
 
 import android.annotation.SuppressLint
+import android.app.Activity.RESULT_OK
 import android.app.AlertDialog
+import android.content.Intent
 import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.os.Parcelable
+import android.text.TextUtils
 import android.view.*
 import android.widget.EditText
 import android.widget.RadioButton
@@ -19,6 +22,8 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.braintreepayments.api.dropin.DropInRequest
+import com.braintreepayments.api.dropin.DropInResult
 import com.communisolve.foodversy.EventBus.CounterCartEvent
 import com.communisolve.foodversy.EventBus.HideFabCart
 import com.communisolve.foodversy.EventBus.UpdateItemInCart
@@ -31,6 +36,8 @@ import com.communisolve.foodversy.database.CartDatabase
 import com.communisolve.foodversy.database.CartItem
 import com.communisolve.foodversy.database.LocalCartDataSource
 import com.communisolve.foodversy.model.Order
+import com.communisolve.foodversy.remote.ApiService
+import com.communisolve.foodversy.remote.RetrofitCloudClient
 import com.google.android.gms.location.*
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.database.FirebaseDatabase
@@ -48,6 +55,9 @@ import java.io.IOException
 import java.util.*
 
 class CartFragment : Fragment(), IOnCartItemMenuClickListner {
+    companion object {
+        val REQUEST_BRAINTREE_CODE = 8080
+    }
 
     //views
     private lateinit var recycler_cart: RecyclerView
@@ -65,6 +75,10 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var currentLocation: Location
 
+    //data
+    internal lateinit var address: String
+    internal lateinit var comment: String
+    internal lateinit var apiService: ApiService
 
     //Database
     private lateinit var compositeDisposable: CompositeDisposable
@@ -133,6 +147,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
 
     @SuppressLint("MissingPermission")
     private fun initViews(root: View?) {
+        apiService = RetrofitCloudClient.getInstance().create(ApiService::class.java)
         setHasOptionsMenu(true) //if we not add it, menu will never be inflace
         txt_empty_cart = root!!.findViewById(R.id.txt_empty_cart)
         txt_total_price = root.findViewById(R.id.txt_total_price)
@@ -232,6 +247,17 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
             builder.setPositiveButton("YES") { dialog, _ ->
                 if (rdi_cod.isChecked) {
                     paymentCOD(edt_address.text.toString(), edt_comment.text.toString())
+                } else if (rdi_online.isChecked) {
+                    address = edt_address.text.toString()
+                    comment = edt_comment.text.toString()
+
+                    if (!TextUtils.isEmpty(Common.currentToken)) {
+                        val dropInRequest = DropInRequest().clientToken(Common.currentToken)
+                        startActivityForResult(
+                            dropInRequest.getIntent(context),
+                            REQUEST_BRAINTREE_CODE
+                        )
+                    }
                 }
 
             }
@@ -289,7 +315,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                                         userName = Common.currentUser!!.name,
                                         userPhone = Common.currentUser!!.phone,
                                         shippingAddress = address,
-                                        comment= comment,
+                                        comment = comment,
                                         lat = currentLocation.latitude,
                                         lng = currentLocation.longitude,
                                         cartItemList = cartListItem,
@@ -298,7 +324,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                                         discount = 0,
                                         isCod = true,
                                         transactionId = "Cash On Delivery"
-                                        )
+                                    )
 
                                     //submit to Firebase
                                     writeOrderToFirebase(order)
@@ -325,8 +351,8 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
             .setValue(order)
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "${it.message}", Toast.LENGTH_SHORT).show()
-            }.addOnCompleteListener {task->
-                if (task.isSuccessful){
+            }.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
                     cartDataSource.cleanCart(Common.currentUser!!.uid)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -335,7 +361,11 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
                             }
 
                             override fun onSuccess(t: Int) {
-                                Toast.makeText(requireContext(), "Order Placed Successfully", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Order Placed Successfully",
+                                    Toast.LENGTH_SHORT
+                                ).show()
 
                             }
 
@@ -520,5 +550,89 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner {
             return true
         }
         return super.onOptionsItemSelected(item)
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_BRAINTREE_CODE) {
+            if (resultCode == RESULT_OK) {
+                val result =
+                    data!!.getParcelableExtra<DropInResult>(DropInResult.EXTRA_DROP_IN_RESULT)
+                val nonce = result!!.paymentMethodNonce
+
+                cartDataSource.sumPrice(Common.currentUser!!.uid)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(object : SingleObserver<Double> {
+                        override fun onSubscribe(d: Disposable) {
+
+
+                        }
+
+                        override fun onSuccess(totalPrice: Double) {
+                            //get all itens to create cart
+                            compositeDisposable.add(
+                                cartDataSource.getAllCart(Common.currentUser!!.uid)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe({ listcartItems ->
+                                        //after having all cat items we will submit payment
+                                        compositeDisposable.add(
+                                            apiService.submitAPIPayment(totalPrice, nonce!!.nonce)
+                                                .subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe({ brainTreeTransaction ->
+                                                    if (brainTreeTransaction.success){
+                                                        //create Order
+                                                            val finalPrice = totalPrice
+                                                        if (currentLocation != null) {
+                                                            val order = Order(
+                                                                userId = Common.currentUser!!.uid,
+                                                                userName = Common.currentUser!!.name,
+                                                                userPhone = Common.currentUser!!.phone,
+                                                                shippingAddress = address,
+                                                                comment = comment,
+                                                                lat = currentLocation.latitude,
+                                                                lng = currentLocation.longitude,
+                                                                cartItemList = listcartItems,
+                                                                totalPayment = totalPrice,
+                                                                finalPayment = finalPrice,
+                                                                discount = 0,
+                                                                isCod = false,
+                                                                transactionId = "Cash On Delivery"
+                                                            )
+
+                                                            //submit to Firebase
+                                                            writeOrderToFirebase(order)
+                                                        }
+                                                    }
+                                                },
+                                                    { throwable ->
+                                                        Toast.makeText(
+                                                            requireContext(),
+                                                            "${throwable.message}",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    })
+                                        )
+
+                                    }, { throwable ->
+
+                                    })
+
+                            )
+
+                        }
+
+                        override fun onError(e: Throwable) {
+                            Toast.makeText(requireContext(), "${e.message}", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+
+
+                    })
+            }
+        }
     }
 }

@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.communisolve.foodversy.common.Common
 import com.communisolve.foodversy.databinding.ActivityMainBinding
 import com.communisolve.foodversy.model.UserModel
+import com.communisolve.foodversy.remote.ApiService
+import com.communisolve.foodversy.remote.RetrofitCloudClient
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
@@ -24,6 +26,9 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import dmax.dialog.SpotsDialog
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -32,6 +37,8 @@ class MainActivity : AppCompatActivity() {
         val APP_REQUEST_CODE = 7171
     }
 
+    private var compositDisposable:CompositeDisposable = CompositeDisposable()
+    private lateinit var apiService:ApiService
     lateinit var binding: ActivityMainBinding
 
     private lateinit var firebaseAuth: FirebaseAuth
@@ -59,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        apiService = RetrofitCloudClient.getInstance().create(ApiService::class.java)
         init()
     }
 
@@ -142,12 +149,34 @@ class MainActivity : AppCompatActivity() {
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
-                        val userModel = snapshot.getValue(UserModel::class.java)
+
+                        compositDisposable.add(
+                            apiService.getToken()
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe({ braintree ->
+                                    dialog.dismiss()
+                                    /*
+                                     val userModel = snapshot.getValue(UserModel::class.java)
                         gotoHomeActivity(userModel)
+                                     */
+
+                                }, {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "${it.message}",
+                                        Toast.LENGTH_SHORT
+                                    )
+                                        .show()
+                                })
+                        )
+                        dialog.dismiss()
+                        val userModel = snapshot.getValue(UserModel::class.java)
+                        gotoHomeActivity(userModel,"")
                     } else {
+                        dialog.dismiss()
                         showRegisterDialog(uid)
                     }
-                    dialog.dismiss()
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -195,9 +224,30 @@ class MainActivity : AppCompatActivity() {
                 .setValue(userModel)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        compositDisposable.add(
+                            apiService.getToken()
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe({ braintree ->
+                                    dialog.dismiss()
+                                    /*
+                                    dialog.dismiss()
+                        Toast.makeText(this, "Registeration Success", Toast.LENGTH_SHORT).show()
+                        gotoHomeActivity(userModel, "")
+                                     */
+
+                                }, {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "${it.message}",
+                                        Toast.LENGTH_SHORT
+                                    )
+                                        .show()
+                                })
+                        )
                         dialog.dismiss()
                         Toast.makeText(this, "Registeration Success", Toast.LENGTH_SHORT).show()
-                        gotoHomeActivity(userModel)
+                        gotoHomeActivity(userModel, "")
                     } else {
 
                     }
@@ -208,8 +258,9 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun gotoHomeActivity(userModel: UserModel?) {
+    private fun gotoHomeActivity(userModel: UserModel?, token: String) {
         Common.currentUser = userModel
+        Common.currentToken = token
         startActivity(Intent(this, HomeActivity::class.java))
         finish()
     }

@@ -10,7 +10,7 @@ object RetrofitCloudClient {
 
     fun getInstance(): Retrofit {
         instance = Retrofit.Builder()
-            .baseUrl("")
+            .baseUrl("https://us-centrall-eatitv2-e8a23.cloudfunctions.net/widgets/")
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
