@@ -69,7 +69,7 @@ object Common {
     }
 
     fun buildToken(authorizeToken: String?): String {
-        return StringBuilder("bearer").append(" ").append(authorizeToken).toString()
+        return StringBuilder("Bearer").append(" ").append(authorizeToken).toString()
     }
 
     var authorizeToken: String?=null
