@@ -36,7 +36,7 @@
     <style name="LogInTheme" parent="FirebaseUI">
 
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/white</item>
+        <item name="colorPrimaryDark">@color/light_red</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorAccent">@color/colorAccent</item>
 
@@ -52,10 +52,11 @@
 
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:background">@color/white</item>
+        <item name="android:background">@color/light_red</item>
         <item name="android:windowFullscreen">true</item>
 
 
     </style>
 
+    <color name="light_red">#e6414a</color>
 </resources>

@@ -38,8 +38,8 @@ class MainActivity : AppCompatActivity() {
         val APP_REQUEST_CODE = 7171
     }
 
-    private var compositDisposable:CompositeDisposable = CompositeDisposable()
-    private lateinit var apiService:ApiService
+    private var compositDisposable: CompositeDisposable = CompositeDisposable()
+    private lateinit var apiService: ApiService
     lateinit var binding: ActivityMainBinding
 
     private lateinit var firebaseAuth: FirebaseAuth
@@ -82,38 +82,38 @@ class MainActivity : AppCompatActivity() {
         dialog = SpotsDialog.Builder()
             .setContext(this).setCancelable(false).build()
         listner = FirebaseAuth.AuthStateListener { firebaseAuth ->
-           Dexter.withActivity(this)
-               .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-               .withListener(object : PermissionListener {
-                   override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
-                       val user = firebaseAuth.currentUser
-                       if (user != null) {
-                           //Already logged
-                           Toast.makeText(this@MainActivity, "logged in", Toast.LENGTH_SHORT).show()
-                           //
-                           checkUserFromFirebaseDatabase(user.uid)
-                       } else {
-                           phonelogIn()
-                       }
-                   }
+            Dexter.withActivity(this)
+                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                .withListener(object : PermissionListener {
+                    override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
+                        val user = firebaseAuth.currentUser
+                        if (user != null) {
+                            //Already logged
+                            Toast.makeText(this@MainActivity, "logged in", Toast.LENGTH_SHORT)
+                                .show()
+                            //
+                            checkUserFromFirebaseDatabase(user.uid)
+                        } else {
+                            phonelogIn()
+                        }
+                    }
 
-                   override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
-                       Toast.makeText(
-                           this@MainActivity,
-                           "You must accept this permission to use app",
-                           Toast.LENGTH_SHORT
-                       ).show()
-                   }
+                    override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "You must accept this permission to use app",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
 
-                   override fun onPermissionRationaleShouldBeShown(
-                       p0: PermissionRequest?,
-                       p1: PermissionToken?
-                   ) {
+                    override fun onPermissionRationaleShouldBeShown(
+                        p0: PermissionRequest?,
+                        p1: PermissionToken?
+                    ) {
 
-                   }
+                    }
 
-               }).check()
-
+                }).check()
 
 
         }
@@ -153,10 +153,13 @@ class MainActivity : AppCompatActivity() {
 
                         FirebaseAuth.getInstance()
                             .currentUser!!.getIdToken(true)
-                            .addOnCompleteListener { task->
+                            .addOnCompleteListener { task ->
                                 Common.authorizeToken = task.result!!.token
-                                val headers = HashMap<String,String>()
-                                headers.put("Authorization",Common.buildToken(Common.authorizeToken))
+                                val headers = HashMap<String, String>()
+                                headers.put(
+                                    "Authorization",
+                                    Common.buildToken(Common.authorizeToken)
+                                )
 
                                 compositDisposable.add(
                                     apiService.getToken(headers)
@@ -164,10 +167,10 @@ class MainActivity : AppCompatActivity() {
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe({ braintree ->
                                             dialog.dismiss()
-                                            /*
-                                             val userModel = snapshot.getValue(UserModel::class.java)
-                                gotoHomeActivity(userModel)
-                                             */
+
+                                            val userModel = snapshot.getValue(UserModel::class.java)
+                                            gotoHomeActivity(userModel,braintree.token)
+
 
                                         }, {
                                             Toast.makeText(
@@ -183,8 +186,7 @@ class MainActivity : AppCompatActivity() {
 
                             }
                         dialog.dismiss()
-                        val userModel = snapshot.getValue(UserModel::class.java)
-                        gotoHomeActivity(userModel,"")
+
                     } else {
                         dialog.dismiss()
                         showRegisterDialog(uid)
@@ -242,19 +244,26 @@ class MainActivity : AppCompatActivity() {
                             .addOnCompleteListener {
                                 Common.authorizeToken = it.result.token
 
-                                val headers = HashMap<String,String>()
-                                headers.put("Authorization",Common.buildToken(Common.authorizeToken))
+                                val headers = HashMap<String, String>()
+                                headers.put(
+                                    "Authorization",
+                                    Common.buildToken(Common.authorizeToken)
+                                )
                                 compositDisposable.add(
                                     apiService.getToken(headers)
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe({ braintree ->
                                             dialog.dismiss()
-                                            /*
+
                                             dialog.dismiss()
-                                Toast.makeText(this, "Registeration Success", Toast.LENGTH_SHORT).show()
-                                gotoHomeActivity(userModel, "")
-                                             */
+                                            Toast.makeText(
+                                                this,
+                                                "Registeration Success",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            gotoHomeActivity(userModel, braintree.token)
+
 
                                         }, {
                                             Toast.makeText(
@@ -263,13 +272,12 @@ class MainActivity : AppCompatActivity() {
                                                 Toast.LENGTH_SHORT
                                             )
                                                 .show()
-                                        }))
+                                        })
+                                )
                             }.addOnFailureListener {
                                 Toast.makeText(this, "${it.message}", Toast.LENGTH_SHORT).show()
                             }
-                        dialog.dismiss()
-                        Toast.makeText(this, "Registeration Success", Toast.LENGTH_SHORT).show()
-                        gotoHomeActivity(userModel, "")
+
                     } else {
 
                     }
