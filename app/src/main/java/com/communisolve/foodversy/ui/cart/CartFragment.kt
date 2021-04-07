@@ -597,7 +597,9 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner, ILoadTimeFromFireb
                         }
 
                         override fun onSuccess(totalPrice: Double) {
-                            //get all itens to create cart
+                            //get all itenms to create cart
+                            Toast.makeText(requireContext(), "$totalPrice", Toast.LENGTH_SHORT)
+                                .show()
                             compositeDisposable.add(
                                 cartDataSource.getAllCart(Common.currentUser!!.uid)
                                     .subscribeOn(Schedulers.io())
@@ -612,7 +614,6 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner, ILoadTimeFromFireb
 
                                         compositeDisposable.add(
                                             apiService.submitAPIPayment(
-                                                headers,
                                                 totalPrice,
                                                 nonce!!.nonce
                                             )
@@ -621,6 +622,14 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner, ILoadTimeFromFireb
                                                 .subscribe({ brainTreeTransaction ->
                                                     if (brainTreeTransaction.success) {
                                                         //create Order
+
+                                                        Toast.makeText(
+                                                            requireContext(),
+                                                            "Submit Payment Success",
+                                                            Toast.LENGTH_SHORT
+                                                        )
+                                                            .show()
+
                                                         val finalPrice = totalPrice
                                                         if (currentLocation != null) {
                                                             val order = Order(

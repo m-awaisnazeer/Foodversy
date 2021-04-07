@@ -15,8 +15,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/white"
-            app:titleTextColor="@color/black"
+            app:titleTextColor="@color/white"
             android:theme="@style/ToolbarColoredBackArrow"
             app:popupTheme="@style/Theme.Foodversy.PopupOverlay" />
 
@@ -31,6 +30,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:tint="@android:color/white"
+        android:backgroundTint="@color/light_red"
+        app:backgroundTint="@color/white"
         android:src="@drawable/ic_baseline_shopping_cart_24" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

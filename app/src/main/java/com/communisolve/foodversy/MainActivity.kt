@@ -151,40 +151,42 @@ class MainActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
 
-                        FirebaseAuth.getInstance()
-                            .currentUser!!.getIdToken(true)
-                            .addOnCompleteListener { task ->
-                                Common.authorizeToken = task.result!!.token
-                                val headers = HashMap<String, String>()
-                                headers.put(
-                                    "Authorization",
-                                    Common.buildToken(Common.authorizeToken)
-                                )
+//                        FirebaseAuth.getInstance()
+//                            .currentUser!!.getIdToken(true)
+//                            .addOnCompleteListener { task ->
+//                                Common.authorizeToken = task.result!!.token
+//                                val headers = HashMap<String, String>()
+//                                headers.put(
+//                                    "Authorization",
+//                                    Common.buildToken(Common.authorizeToken)
+//                                )
+//
+//
+//
+//                            }.addOnFailureListener {
+//
+//                            }
 
-                                compositDisposable.add(
-                                    apiService.getToken(headers)
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe({ braintree ->
-                                            dialog.dismiss()
+                        compositDisposable.add(
+                            apiService.getToken()
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe({ braintree ->
+                                    dialog.dismiss()
 
-                                            val userModel = snapshot.getValue(UserModel::class.java)
-                                            gotoHomeActivity(userModel,braintree.token)
+                                    val userModel = snapshot.getValue(UserModel::class.java)
+                                    gotoHomeActivity(userModel,braintree.token)
 
 
-                                        }, {
-                                            Toast.makeText(
-                                                this@MainActivity,
-                                                "${it.message}",
-                                                Toast.LENGTH_SHORT
-                                            )
-                                                .show()
-                                        })
-                                )
-
-                            }.addOnFailureListener {
-
-                            }
+                                }, {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "${it.message}",
+                                        Toast.LENGTH_SHORT
+                                    )
+                                        .show()
+                                })
+                        )
                         dialog.dismiss()
 
                     } else {
@@ -239,44 +241,47 @@ class MainActivity : AppCompatActivity() {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
 
-                        FirebaseAuth.getInstance().currentUser!!
-                            .getIdToken(true)
-                            .addOnCompleteListener {
-                                Common.authorizeToken = it.result.token
+//                        FirebaseAuth.getInstance().currentUser!!
+//                            .getIdToken(true)
+//                            .addOnCompleteListener {
+//                                Common.authorizeToken = it.result.token
+//
+//                                val headers = HashMap<String, String>()
+//                                headers.put(
+//                                    "Authorization",
+//                                    Common.buildToken(Common.authorizeToken)
+//                                )
+//
+//
+//                            }.addOnFailureListener {
+//                                Toast.makeText(this, "${it.message}", Toast.LENGTH_SHORT).show()
+//                            }
 
-                                val headers = HashMap<String, String>()
-                                headers.put(
-                                    "Authorization",
-                                    Common.buildToken(Common.authorizeToken)
-                                )
-                                compositDisposable.add(
-                                    apiService.getToken(headers)
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe({ braintree ->
-                                            dialog.dismiss()
+                        compositDisposable.add(
+                            apiService.getToken()
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe({ braintree ->
+                                    dialog.dismiss()
 
-                                            dialog.dismiss()
-                                            Toast.makeText(
-                                                this,
-                                                "Registeration Success",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                            gotoHomeActivity(userModel, braintree.token)
+                                    dialog.dismiss()
+                                    Toast.makeText(
+                                        this,
+                                        "Registeration Success",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    gotoHomeActivity(userModel, braintree.token)
 
 
-                                        }, {
-                                            Toast.makeText(
-                                                this@MainActivity,
-                                                "${it.message}",
-                                                Toast.LENGTH_SHORT
-                                            )
-                                                .show()
-                                        })
-                                )
-                            }.addOnFailureListener {
-                                Toast.makeText(this, "${it.message}", Toast.LENGTH_SHORT).show()
-                            }
+                                }, {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "${it.message}",
+                                        Toast.LENGTH_SHORT
+                                    )
+                                        .show()
+                                })
+                        )
 
                     } else {
 

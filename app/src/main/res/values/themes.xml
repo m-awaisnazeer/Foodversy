@@ -2,8 +2,8 @@
     <!-- Base application theme. -->
     <style name="Theme.Foodversy" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorPrimary">@color/light_red</item>
+        <item name="colorPrimaryVariant">@color/dark_red</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -14,7 +14,7 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="Theme.Foodversy.NoActionBar">
+    <style name="Theme.Foodversy.NoActionBar" parent="Theme.Foodversy">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
@@ -24,7 +24,7 @@
     <style name="Theme.Foodversy.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="ToolbarColoredBackArrow" parent="Theme.Foodversy">
-        <item name="android:textColorSecondary">@android:color/black</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
     </style>
 
     <style name="DialogStyle" parent="Theme.Design.BottomSheetDialog">
@@ -35,8 +35,8 @@
 
     <style name="LogInTheme" parent="FirebaseUI">
 
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/light_red</item>
+        <item name="colorPrimary">@color/light_red</item>
+        <item name="colorPrimaryVariant">@color/dark_red</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorAccent">@color/colorAccent</item>
 
@@ -58,5 +58,4 @@
 
     </style>
 
-    <color name="light_red">#e6414a</color>
 </resources>

@@ -66,7 +66,7 @@ class MyFoodListAdapter(
         var currentFoodModel = foodsList.get(position)
         Glide.with(context).load(foodsList.get(position).image).into(binding!!.imgFoodList)
         binding!!.txtFoodName.setText(foodsList.get(position).name)
-        binding!!.txtFoodPrice.setText(foodsList.get(position).price.toString())
+        binding!!.txtFoodPrice.setText("$${foodsList.get(position).price.toString()}")
 
         holder.setListner(object : IRecyclerItemClickLitner {
             override fun onItemClick(view: View, pos: Int) {
