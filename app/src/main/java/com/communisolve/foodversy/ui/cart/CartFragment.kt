@@ -26,6 +26,7 @@ import com.braintreepayments.api.dropin.DropInRequest
 import com.braintreepayments.api.dropin.DropInResult
 import com.communisolve.foodversy.EventBus.CounterCartEvent
 import com.communisolve.foodversy.EventBus.HideFabCart
+import com.communisolve.foodversy.EventBus.MenuItemBack
 import com.communisolve.foodversy.EventBus.UpdateItemInCart
 import com.communisolve.foodversy.R
 import com.communisolve.foodversy.adapter.MyCartAdapter
@@ -353,18 +354,18 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner, ILoadTimeFromFireb
 
     private fun syncLocalTimeWithServerTime(order: Order) {
         val offsetRef = FirebaseDatabase.getInstance().getReference(".info/serverTimeOffset")
-        offsetRef.addListenerForSingleValueEvent(object :ValueEventListener{
+        offsetRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val offset = snapshot.getValue(Long::class.java)
-                val estimatedTimeInMS = System.currentTimeMillis()+offset!!
+                val estimatedTimeInMS = System.currentTimeMillis() + offset!!
 
                 val sdf = SimpleDateFormat("MM dd yyyy, HH:mm")
                 val date = Date(estimatedTimeInMS)
-                listener.onLoadTimeSuccess(order,estimatedTimeInMS)
+                listener.onLoadTimeSuccess(order, estimatedTimeInMS)
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                Toast.makeText(requireContext(), "${error.message}", Toast.LENGTH_SHORT).show()
             }
 
         })
@@ -689,5 +690,10 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner, ILoadTimeFromFireb
 
     override fun onLoadTimeFailed(message: String) {
         Toast.makeText(requireContext(), "${message}", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onDestroy() {
+        EventBus.getDefault().postSticky(MenuItemBack())
+        super.onDestroy()
     }
 }

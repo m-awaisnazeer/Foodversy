@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.communisolve.foodversy.EventBus.MenuItemBack
 import com.communisolve.foodversy.R
 import com.communisolve.foodversy.adapter.MyOrderAdapter
 import com.communisolve.foodversy.callbacks.ILoadOrderCallbaclListner
@@ -22,6 +23,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import dmax.dialog.SpotsDialog
+import org.greenrobot.eventbus.EventBus
 
 
 class ViewOrderFragment : Fragment(), ILoadOrderCallbaclListner {
@@ -105,5 +107,9 @@ class ViewOrderFragment : Fragment(), ILoadOrderCallbaclListner {
     override fun onLoadOrdersFailed(message: String) {
         dialog.dismiss()
         Toast.makeText(requireContext(), "${message}", Toast.LENGTH_SHORT).show()
+    }
+    override fun onDestroy() {
+        EventBus.getDefault().postSticky(MenuItemBack())
+        super.onDestroy()
     }
 }

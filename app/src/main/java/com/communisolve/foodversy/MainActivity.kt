@@ -19,6 +19,7 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.iid.FirebaseInstanceId
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -30,7 +31,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.util.*
-import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity() {
 
@@ -175,7 +175,7 @@ class MainActivity : AppCompatActivity() {
                                     dialog.dismiss()
 
                                     val userModel = snapshot.getValue(UserModel::class.java)
-                                    gotoHomeActivity(userModel,braintree.token)
+                                    gotoHomeActivity(userModel, braintree.token)
 
 
                                 }, {
@@ -294,9 +294,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun gotoHomeActivity(userModel: UserModel?, token: String) {
-        Common.currentUser = userModel
-        Common.currentToken = token
-        startActivity(Intent(this, HomeActivity::class.java))
-        finish()
+        FirebaseInstanceId.getInstance().instanceId
+            .addOnFailureListener {
+                Toast.makeText(this, "${it.message}", Toast.LENGTH_SHORT).show()
+                Common.currentUser = userModel
+                Common.currentToken = token
+                startActivity(Intent(this, HomeActivity::class.java))
+                finish()
+            }
+            .addOnCompleteListener {
+                Common.currentUser = userModel
+                Common.currentToken = token
+                Common.updateToken(this, it.result.token)
+                startActivity(Intent(this, HomeActivity::class.java))
+                finish()
+            }
+
     }
 }

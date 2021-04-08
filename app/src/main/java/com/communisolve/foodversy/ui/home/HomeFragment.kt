@@ -8,10 +8,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.communisolve.foodversy.EventBus.MenuItemBack
 import com.communisolve.foodversy.R
 import com.communisolve.foodversy.adapter.MyBestDealsAdapter
 import com.communisolve.foodversy.adapter.MyPopularCategoriesAdapter
 import com.communisolve.foodversy.databinding.FragmentHomeBinding
+import org.greenrobot.eventbus.EventBus
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -53,5 +55,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onPause() {
         binding!!.viewpager.pauseAutoScroll()
         super.onPause()
+    }
+    override fun onDestroy() {
+        EventBus.getDefault().postSticky(MenuItemBack())
+        super.onDestroy()
     }
 }

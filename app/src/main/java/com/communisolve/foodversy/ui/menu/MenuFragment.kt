@@ -12,10 +12,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.communisolve.foodversy.EventBus.MenuItemBack
 import com.communisolve.foodversy.R
 import com.communisolve.foodversy.adapter.MyCategoriesAdapter
 import com.communisolve.foodversy.common.SpacesItemDecoration
 import dmax.dialog.SpotsDialog
+import org.greenrobot.eventbus.EventBus
 
 class MenuFragment : Fragment() {
 
@@ -73,5 +75,8 @@ class MenuFragment : Fragment() {
             addItemDecoration(SpacesItemDecoration(8))
         }
     }
-
+    override fun onDestroy() {
+        EventBus.getDefault().postSticky(MenuItemBack())
+        super.onDestroy()
+    }
 }

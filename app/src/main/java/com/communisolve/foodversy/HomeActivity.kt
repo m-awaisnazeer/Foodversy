@@ -40,6 +40,7 @@ import org.greenrobot.eventbus.ThreadMode
 
 class HomeActivity : AppCompatActivity() {
 
+    private var menuItemClick: Int = -1
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var cartDataSource: CartDataSource
     private lateinit var fab: CounterFab
@@ -66,7 +67,7 @@ class HomeActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_menu, R.id.nav_cart,R.id.nav_viewOrderFragment
+                R.id.nav_home, R.id.nav_menu, R.id.nav_cart, R.id.nav_viewOrderFragment
             ), drawerLayout
         )
 
@@ -82,14 +83,49 @@ class HomeActivity : AppCompatActivity() {
 
         counterCartItem()
 
-        navView.menu.findItem(R.id.nav_signout).setOnMenuItemClickListener {
-            FirebaseAuth.getInstance().signOut()
-            Common.foodSelected = null
-            Common.categorySelected = null
-            Common.currentUser = null
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-            return@setOnMenuItemClickListener true
+//        navView.menu.findItem(R.id.nav_signout).setOnMenuItemClickListener {
+//            FirebaseAuth.getInstance().signOut()
+//            Common.foodSelected = null
+//            Common.categorySelected = null
+//            Common.currentUser = null
+//            startActivity(Intent(this, MainActivity::class.java))
+//            finish()
+//            return@setOnMenuItemClickListener true
+//        }
+
+        navView.setNavigationItemSelectedListener { menuItem ->
+            menuItem.isChecked = true
+            drawerLayout.closeDrawers()
+
+            when (menuItem.itemId) {
+                R.id.nav_signout -> {
+                    FirebaseAuth.getInstance().signOut()
+                    Common.foodSelected = null
+                    Common.categorySelected = null
+                    Common.currentUser = null
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                }
+                R.id.nav_home -> {
+                    if (menuItemClick != menuItem.itemId)
+                        navController.navigate(R.id.nav_home)
+                }
+                R.id.nav_menu -> {
+                    if (menuItemClick != menuItem.itemId)
+                        navController.navigate(R.id.nav_menu)
+                }
+                R.id.nav_viewOrderFragment -> {
+                    if (menuItemClick != menuItem.itemId)
+                        navController.navigate(R.id.nav_viewOrderFragment)
+                }
+                R.id.nav_cart -> {
+                    if (menuItemClick != menuItem.itemId)
+                        navController.navigate(R.id.nav_cart)
+                }
+            }
+            menuItemClick = menuItem.itemId
+
+            return@setNavigationItemSelectedListener true
         }
     }
 
@@ -172,8 +208,9 @@ class HomeActivity : AppCompatActivity() {
                                 .addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(snapshot: DataSnapshot) {
                                         if (snapshot.exists()) {
-                                            for (foodSnapshot in snapshot.children){
-                                                Common.foodSelected = foodSnapshot.getValue(FoodModel::class.java)
+                                            for (foodSnapshot in snapshot.children) {
+                                                Common.foodSelected =
+                                                    foodSnapshot.getValue(FoodModel::class.java)
                                                 Common.foodSelected!!.key = foodSnapshot.key!!
 
                                             }
@@ -245,8 +282,9 @@ class HomeActivity : AppCompatActivity() {
                                 .addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(snapshot: DataSnapshot) {
                                         if (snapshot.exists()) {
-                                            for (foodSnapshot in snapshot.children){
-                                                Common.foodSelected = foodSnapshot.getValue(FoodModel::class.java)
+                                            for (foodSnapshot in snapshot.children) {
+                                                Common.foodSelected =
+                                                    foodSnapshot.getValue(FoodModel::class.java)
                                                 Common.foodSelected!!.key = foodSnapshot.key!!
                                             }
                                             navController.navigate(R.id.nav_foodDetailsFragment)
@@ -295,7 +333,6 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-
     private fun counterCartItem() {
         cartDataSource.countItemInCart(Common.currentUser!!.uid)
             .subscribeOn(Schedulers.io())
@@ -320,5 +357,12 @@ class HomeActivity : AppCompatActivity() {
                 }
 
             })
+    }
+
+    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
+    fun onMenuItemBack(event:MenuItemBack){
+        menuItemClick = -1
+        if (supportFragmentManager.backStackEntryCount >0)
+            supportFragmentManager.popBackStack()
     }
 }

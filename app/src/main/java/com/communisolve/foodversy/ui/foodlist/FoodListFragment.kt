@@ -11,9 +11,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.communisolve.foodversy.EventBus.MenuItemBack
 import com.communisolve.foodversy.R
 import com.communisolve.foodversy.adapter.MyFoodListAdapter
 import com.communisolve.foodversy.common.Common
+import org.greenrobot.eventbus.EventBus
 
 class FoodListFragment : Fragment() {
 
@@ -49,5 +51,8 @@ class FoodListFragment : Fragment() {
             adapter.onStop()
         super.onStop()
     }
-
+    override fun onDestroy() {
+        EventBus.getDefault().postSticky(MenuItemBack())
+        super.onDestroy()
+    }
 }

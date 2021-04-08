@@ -16,6 +16,7 @@ import com.andremion.counterfab.CounterFab
 import com.bumptech.glide.Glide
 import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton
 import com.communisolve.foodversy.EventBus.CounterCartEvent
+import com.communisolve.foodversy.EventBus.MenuItemBack
 import com.communisolve.foodversy.R
 import com.communisolve.foodversy.common.Common
 import com.communisolve.foodversy.database.CartDataSource
@@ -531,4 +532,8 @@ class FoodDetailsFragment : Fragment(R.layout.food_details_fragment), TextWatche
     }
 
 
+    override fun onDestroy() {
+        EventBus.getDefault().postSticky(MenuItemBack())
+        super.onDestroy()
+    }
 }
