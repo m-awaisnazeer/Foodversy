@@ -19,8 +19,8 @@ class MyFCMServices : FirebaseMessagingService() {
             val dataRecv = remoteMessage.data
             if (!dataRecv.isEmpty()){
                 Common.showNotification(this, Random.nextInt(),
-                    dataRecv[Common.NOTI_TITLE]+"data..",
-                    dataRecv[Common.NOTI_CONTENT]+"data..",
+                    dataRecv[Common.NOTI_TITLE],
+                    dataRecv[Common.NOTI_CONTENT],
                     null)
             }
         }
@@ -28,8 +28,8 @@ class MyFCMServices : FirebaseMessagingService() {
             val dataRecv = remoteMessage.notification
 
             Common.showNotification(this, Random.nextInt(),
-                dataRecv!!.title+"notificatin..",
-                dataRecv!!.body+"notificatin..",
+                dataRecv!!.title,
+                dataRecv!!.body,
                 null)
 
         }
