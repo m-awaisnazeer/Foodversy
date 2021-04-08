@@ -37,9 +37,12 @@ import com.communisolve.foodversy.database.CartDataSource
 import com.communisolve.foodversy.database.CartDatabase
 import com.communisolve.foodversy.database.CartItem
 import com.communisolve.foodversy.database.LocalCartDataSource
+import com.communisolve.foodversy.model.FCMSendData
 import com.communisolve.foodversy.model.Order
 import com.communisolve.foodversy.remote.ApiService
+import com.communisolve.foodversy.remote.IFCMService
 import com.communisolve.foodversy.remote.RetrofitCloudClient
+import com.communisolve.foodversy.remote.RetrofitFCMClient
 import com.google.android.gms.location.*
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.database.DataSnapshot
@@ -59,11 +62,14 @@ import org.greenrobot.eventbus.ThreadMode
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 class CartFragment : Fragment(), IOnCartItemMenuClickListner, ILoadTimeFromFirebaseCallback {
     companion object {
         val REQUEST_BRAINTREE_CODE = 8080
     }
+
+    private lateinit var ifcmService: IFCMService
 
     //views
     private lateinit var recycler_cart: RecyclerView
@@ -155,6 +161,7 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner, ILoadTimeFromFireb
     @SuppressLint("MissingPermission")
     private fun initViews(root: View?) {
         listener = this
+        ifcmService = RetrofitFCMClient.getInstance().create(IFCMService::class.java)
         apiService = RetrofitCloudClient.getInstance().create(ApiService::class.java)
         setHasOptionsMenu(true) //if we not add it, menu will never be inflace
         txt_empty_cart = root!!.findViewById(R.id.txt_empty_cart)
@@ -388,11 +395,36 @@ class CartFragment : Fragment(), IOnCartItemMenuClickListner, ILoadTimeFromFireb
                             }
 
                             override fun onSuccess(t: Int) {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Order Placed Successfully",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+
+                                val dataSend = HashMap<String, String>()
+                                dataSend.put(Common.NOTI_TITLE!!, "New Order")
+                                dataSend.put(
+                                    Common.NOTI_CONTENT!!,
+                                    "You have new order" + Common.currentUser!!.phone
+                                )
+
+                                val sendData = FCMSendData(Common.getNewOrderTopic(), dataSend)
+                                compositeDisposable.add(
+                                    ifcmService.sendNotification(sendData)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe({ fcmResponse ->
+                                            if (fcmResponse.success != 0) {
+                                                Toast.makeText(
+                                                    requireContext(),
+                                                    "Order Placed Successfully",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }, {
+                                            Toast.makeText(
+                                                requireContext(),
+                                                "Order Placed Successfully but notification failed",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        })
+                                )
+
 
                             }
 

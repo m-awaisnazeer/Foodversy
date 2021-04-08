@@ -12,14 +12,26 @@ class MyFCMServices : FirebaseMessagingService() {
         Common.updateToken(this,token)
     }
 
+
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-        val dataRecv = remoteMessage.data
-        if (!dataRecv.isEmpty()){
+        if (remoteMessage.data !=null && !remoteMessage.data.isEmpty()){
+            val dataRecv = remoteMessage.data
+            if (!dataRecv.isEmpty()){
+                Common.showNotification(this, Random.nextInt(),
+                    dataRecv[Common.NOTI_TITLE]+"data..",
+                    dataRecv[Common.NOTI_CONTENT]+"data..",
+                    null)
+            }
+        }
+        if (remoteMessage.notification !=null){
+            val dataRecv = remoteMessage.notification
+
             Common.showNotification(this, Random.nextInt(),
-            dataRecv[Common.NOTI_TITLE],
-            dataRecv[Common.NOTI_CONTENT],
-            null)
+                dataRecv!!.title+"notificatin..",
+                dataRecv!!.body+"notificatin..",
+                null)
+
         }
     }
 }

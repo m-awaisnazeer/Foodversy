@@ -85,7 +85,8 @@ object Common {
     }
 
     fun updateToken(context: Context, token: String) {
-        FirebaseDatabase.getInstance().getReference(Common.TOKEN_REF)
+        if (currentUser!=null)
+            FirebaseDatabase.getInstance().getReference(Common.TOKEN_REF)
             .child(Common.currentUser!!.uid)
             .setValue(TokenModel(currentUser!!.uid,token))
             .addOnFailureListener { Toast.makeText(context, "$token", Toast.LENGTH_SHORT).show() }
@@ -124,6 +125,10 @@ object Common {
 
         val notification = builder.build()
         notificationManager.notify(id,notification)
+    }
+
+    fun getNewOrderTopic(): String? {
+        return java.lang.StringBuilder("/topics/new_order").toString()
     }
 
     val NOTI_CONTENT: String?="content"
