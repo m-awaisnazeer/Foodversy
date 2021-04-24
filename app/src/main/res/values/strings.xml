@@ -34,4 +34,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="fragment_view_order">Orders Placed</string>
+    <string name="cancel_order">Cancel Order</string>
+    <string name="tracking_order">Tracking Order</string>
+    <string name="title_activity_tracking_order">Map</string>
 </resources>

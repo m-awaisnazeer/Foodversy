@@ -1,12 +1,13 @@
 package com.communisolve.foodversy.ui.view_orders
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -16,8 +17,11 @@ import com.communisolve.foodversy.EventBus.MenuItemBack
 import com.communisolve.foodversy.R
 import com.communisolve.foodversy.adapter.MyOrderAdapter
 import com.communisolve.foodversy.callbacks.ILoadOrderCallbaclListner
+import com.communisolve.foodversy.callbacks.IOnOrderItemMenuClickListener
 import com.communisolve.foodversy.common.Common
 import com.communisolve.foodversy.model.Order
+import com.communisolve.foodversy.model.ShippingOrderModel
+import com.communisolve.foodversy.ui.TrackingOrderActivity
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -26,14 +30,14 @@ import dmax.dialog.SpotsDialog
 import org.greenrobot.eventbus.EventBus
 
 
-class ViewOrderFragment : Fragment(), ILoadOrderCallbaclListner {
+class ViewOrderFragment : Fragment(), ILoadOrderCallbaclListner, IOnOrderItemMenuClickListener {
 
-    private val viewModel:ViewOrderViewModel by viewModels()
+    private val viewModel: ViewOrderViewModel by viewModels()
 
-    internal lateinit var dialog:AlertDialog
-    internal var recycler_order:RecyclerView?=null
+    internal lateinit var dialog: AlertDialog
+    internal var recycler_order: RecyclerView? = null
 
-    internal lateinit var listner:ILoadOrderCallbaclListner
+    internal lateinit var listner: ILoadOrderCallbaclListner
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,7 +49,7 @@ class ViewOrderFragment : Fragment(), ILoadOrderCallbaclListner {
         loadOrderFromFirebase()
 
         viewModel.mutableLiveDataOrderList.observe(viewLifecycleOwner, Observer {
-            val adapter = MyOrderAdapter(requireContext(),it.asReversed())
+            val adapter = MyOrderAdapter(requireContext(), it.asReversed(), this)
             recycler_order!!.adapter = adapter
         })
         return root
@@ -58,9 +62,9 @@ class ViewOrderFragment : Fragment(), ILoadOrderCallbaclListner {
             .orderByChild("userId")
             .equalTo(Common.currentUser!!.uid)
             .limitToLast(100)
-            .addListenerForSingleValueEvent(object :ValueEventListener{
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    for (ordersnapshot in snapshot.children){
+                    for (ordersnapshot in snapshot.children) {
                         val order = ordersnapshot.getValue(Order::class.java)
                         order!!.orderNumber = ordersnapshot!!.key!!
                         orderList.add(order)
@@ -77,7 +81,6 @@ class ViewOrderFragment : Fragment(), ILoadOrderCallbaclListner {
             })
 
 
-
     }
 
     private fun initViews(root: View?) {
@@ -91,7 +94,12 @@ class ViewOrderFragment : Fragment(), ILoadOrderCallbaclListner {
             this!!.setHasFixedSize(true)
             var mLayoutManager = LinearLayoutManager(requireContext())
             this!!.layoutManager = mLayoutManager
-            this!!.addItemDecoration(DividerItemDecoration(requireContext(),mLayoutManager.orientation))
+            this!!.addItemDecoration(
+                DividerItemDecoration(
+                    requireContext(),
+                    mLayoutManager.orientation
+                )
+            )
         }
     }
 
@@ -108,8 +116,54 @@ class ViewOrderFragment : Fragment(), ILoadOrderCallbaclListner {
         dialog.dismiss()
         Toast.makeText(requireContext(), "${message}", Toast.LENGTH_SHORT).show()
     }
+
     override fun onDestroy() {
         EventBus.getDefault().postSticky(MenuItemBack())
         super.onDestroy()
+    }
+
+    override fun onCancelOrderClick(pos: Int, orderModel: Order) {
+
+    }
+
+    override fun onTrackingOrderClick(pos: Int, orderModel: Order) {
+        //Fetch From Firebase
+        FirebaseDatabase.getInstance().getReference(Common.SHIPPING_ORDER_REF) //
+            .child(orderModel.orderNumber)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+
+                    if (snapshot.exists()) {
+
+                        Common.currentShippingOrder =
+                            snapshot.getValue(ShippingOrderModel::class.java)
+                        if (Common.currentShippingOrder!!.currentLat != -1.0 &&
+                            Common.currentShippingOrder!!.currentLng != -1.0
+                        ) {
+                            startActivity(Intent(requireContext(), TrackingOrderActivity::class.java))
+
+                        }else{
+                            Toast.makeText(
+                                requireContext(),
+                                "your order has not been shipped, please wait",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                    } else {
+                        Toast.makeText(
+                            requireContext(),
+                            "you just place your order, please wait for it shipping",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(requireContext(), "${error.message}", Toast.LENGTH_SHORT).show()
+                }
+
+            })
+
     }
 }
