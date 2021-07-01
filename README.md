@@ -1,5 +1,5 @@
 # Foodversy
-This is My FYP Project. I Developed this App by using Firebase SSO(Authentication), Firebase Cloud Messaging For Push Notification, Room persistanse Library for local Cart System, RXJAVA, RXAndroid, Retrofit, Stripe Payment Gateway, Google Maps, Places, Direction APIs, and Firebase Realtime database as Backend
+This is My FYP Project. I Developed this App by using Firebase SSO(Authentication), Firebase Cloud Messaging For Push Notification, Room persistanse Library for local Cart System, RXJAVA, RXAndroid, Retrofit, Stripe Payment Integration, Google Maps, Places, and Direction APIs.
 
 # 1
 
